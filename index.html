@@ -577,7 +577,10 @@ function resetForm(){
 
 /* ---------- finalizar ---------- */
   async function enviarPedidoSupabase(order){
-  if(!sb) return;
+if(!sb){
+  alert('SUPABASE NÃO ESTÁ CONECTADO');
+  return;
+}
 
   try {
     const { error } = await sb.from('orders').insert({
