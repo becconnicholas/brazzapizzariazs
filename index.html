@@ -703,7 +703,7 @@ function renderOrders(){
         <span class="tot">${money(o.total)}</span><span class="meta">${esc(o.pay)}</span>
         ${NEXT_LABEL[o.status] ? `<button class="btn sm" data-a="advance" data-id="${o.id}">${NEXT_LABEL[o.status]}</button>` : ''}
         <button class="btn alt sm" data-a="view" data-id="${o.id}">Recibo</button>
-        ${o.status!=='cancelado' && o.status!=='entregue' ? `<button class="btn alt sm" style="color:var(--red)" data-a="cancel" data-id="${o.id}">Cancelar</button>` : ''}
+       ${o.status!=='cancelado' ? `<button class="btn alt sm" style="color:var(--red)" data-a="cancel" data-id="${o.id}">Cancelar</button>` : ''}
       </div>
     </article>`).join('') : `<div class="empty">Nenhum pedido em ${fmtDate(k)}.</div>`;
 }
