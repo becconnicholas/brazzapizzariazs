@@ -577,7 +577,7 @@ function resetForm(){
 }
 
 /* ---------- finalizar ---------- */
-function finish(){
+async function finish(){
   if(!C.items.length) return;
   const t = calc();
   if(C.type==='entrega' && !C.addr.trim()){ toast('Informe o endereço de entrega.'); $('#fAddr').focus(); return; }
@@ -597,11 +597,46 @@ function finish(){
     change: C.pay==='Dinheiro' && recv>t.total ? Math.round((recv-t.total)*100)/100 : 0,
     status: 'novo'
   };
-  S.orders.push(order); save();
-  const keepType = C.type;
-  C = newCart(keepType); resetForm(); renderCart();
-  $('#cart').classList.remove('open');
-  showReceipt(order, true);
+  const { data: savedOrder, error: dbError } = await sb
+  .from('orders')
+  .insert({
+    user_name: getSession() || '',
+    customer: order.customer,
+    phone: order.phone,
+    address: order.addr,
+    mesa: order.mesa,
+    items: order.items,
+    subtotal: order.subtotal,
+    discount: order.discount,
+    fee: order.fee,
+    total: order.total,
+    pay: order.pay,
+    received: order.received,
+    change_amount: order.change,
+    status: order.status
+  })
+  .select()
+  .single();
+
+if (dbError) {
+  console.error('Erro ao salvar pedido:', dbError);
+  toast('Erro ao salvar o pedido no banco.');
+  return;
+}
+
+S.orders.push({
+  ...order,
+  db_id: savedOrder.id
+});
+
+save();
+
+const keepType = C.type;
+C = newCart(keepType);
+resetForm();
+renderCart();
+$('#cart').classList.remove('open');
+showReceipt(order, true);
 }
 
 function typeLabel(o){ return o.type==='entrega' ? 'Entrega' : o.type==='mesa' ? 'Mesa '+o.mesa : 'Balcão'; }
