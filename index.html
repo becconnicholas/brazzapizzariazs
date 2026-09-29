@@ -634,6 +634,7 @@ function finish(){
   };
 S.orders.push(order);
 save();
+enviarPedidoSupabase(order);
   
   const keepType = C.type;
   C = newCart(keepType); resetForm(); renderCart();
