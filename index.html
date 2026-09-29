@@ -642,9 +642,17 @@ enviarPedidoSupabase(order);
 
   
   const keepType = C.type;
-  C = newCart(keepType); resetForm(); renderCart();
+  C = newCart(keepType);
+  resetForm();
+  renderCart();
   $('#cart').classList.remove('open');
+
+  // Mostra o recibo e imprime automaticamente
   showReceipt(order, true);
+
+  setTimeout(() => {
+    printOrder(order.id);
+  }, 300);
 }
 
 function typeLabel(o){ return o.type==='entrega' ? 'Entrega' : o.type==='mesa' ? 'Mesa '+o.mesa : 'Balcão'; }
@@ -684,9 +692,24 @@ function showReceipt(o, isNew){
   openModal();
 }
 function printOrder(id){
-  const o = S.orders.find(x=>x.id===id); if(!o) return;
-  $('#printArea').innerHTML = receiptHTML(o);
-  window.print();
+  const o = S.orders.find(x => x.id === id);
+  if(!o) return;
+
+  const printArea = $('#printArea');
+
+  printArea.innerHTML = receiptHTML(o);
+  printArea.classList.add('printing');
+
+  // Dá tempo para o navegador montar o conteúdo
+  setTimeout(() => {
+    window.print();
+
+    setTimeout(() => {
+      printArea.classList.remove('printing');
+      printArea.innerHTML = '';
+    }, 1000);
+
+  }, 100);
 }
 
 /* ---------- pedidos ---------- */
@@ -3060,6 +3083,78 @@ renderGrid(); renderCart();
   #logoutButton.visible {
     display: block;
   }
+  /* =========================================================
+   IMPRESSÃO AUTOMÁTICA - OASIS OIA-8387 - BOBINA 58mm
+   ========================================================= */
+
+#printArea {
+  display: none;
+}
+
+@media print {
+  body > * {
+    display: none !important;
+  }
+
+  #printArea {
+    display: block !important;
+    width: 58mm !important;
+    max-width: 58mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  #printArea .receipt {
+    width: 58mm;
+    max-width: 58mm;
+    box-sizing: border-box;
+    padding: 2mm 2mm;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    line-height: 1.25;
+    color: #000;
+  }
+
+  #printArea .receipt h3 {
+    text-align: center;
+    font-size: 17px;
+    margin: 0 0 4px;
+    color: #000;
+  }
+
+  #printArea .receipt .c {
+    text-align: center;
+  }
+
+  #printArea .receipt hr {
+    border: 0;
+    border-top: 1px dashed #000;
+    margin: 6px 0;
+  }
+
+  #printArea .receipt .r {
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+  }
+
+  #printArea .receipt .b {
+    font-weight: 700;
+  }
+
+  #printArea .receipt .ind {
+    padding-left: 8px;
+    font-size: 10px;
+  }
+
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
+}
 </style>
 
 <div id="loginScreen">
