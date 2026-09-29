@@ -639,7 +639,9 @@ function finish(){
   };
 S.orders.push(order);
 save();
+alert('CHEGUEI AQUI');
 enviarPedidoSupabase(order);
+
   
   const keepType = C.type;
   C = newCart(keepType); resetForm(); renderCart();
