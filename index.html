@@ -3078,7 +3078,9 @@ renderGrid(); renderCart();
   #logoutButton.visible {
     display: block;
   }
-/* IMPRESSÃO AUTOMÁTICA - OASIS OIA-8387 - BOBINA 58mm */
+/* =========================================================
+   IMPRESSÃO - OASIS OIA-8387 - BOBINA 58mm
+   ========================================================= */
 
 #printArea {
   display: none;
@@ -3087,36 +3089,53 @@ renderGrid(); renderCart();
 @media print {
 
   @page {
-    margin: 0;
+    size: 58mm 120mm;
+    margin: 0 !important;
   }
 
-  html,
-  body {
+  html {
+    width: 58mm !important;
     margin: 0 !important;
     padding: 0 !important;
+  }
+
+  body {
+    width: 58mm !important;
+    min-width: 58mm !important;
+    max-width: 58mm !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
     background: #fff !important;
   }
 
+  /* Esconde todo o sistema */
   body > * {
     display: none !important;
   }
 
+  /* Mostra somente o recibo */
   #printArea {
     display: block !important;
+
     width: 58mm !important;
     max-width: 58mm !important;
+
     margin: 0 !important;
     padding: 0 !important;
-    overflow: visible !important;
+
     background: #fff !important;
     color: #000 !important;
+
+    overflow: visible !important;
   }
 
   #printArea .receipt {
     display: block !important;
 
-    width: 54mm !important;
-    max-width: 54mm !important;
+    width: 58mm !important;
+    max-width: 58mm !important;
 
     box-sizing: border-box !important;
 
@@ -3136,7 +3155,10 @@ renderGrid(); renderCart();
 
   #printArea .receipt h3 {
     margin: 0 0 2mm 0 !important;
+    padding: 0 !important;
+
     text-align: center !important;
+
     font-size: 16px !important;
   }
 
@@ -3147,20 +3169,26 @@ renderGrid(); renderCart();
   #printArea .receipt hr {
     border: 0 !important;
     border-top: 1px dashed #000 !important;
+
     margin: 2mm 0 !important;
   }
 
   #printArea .receipt .r {
     display: flex !important;
+
     justify-content: space-between !important;
     align-items: flex-start !important;
+
     width: 100% !important;
+
     gap: 2mm !important;
   }
 
   #printArea .receipt .r span:first-child {
     min-width: 0 !important;
+
     overflow-wrap: anywhere !important;
+    word-break: break-word !important;
   }
 
   #printArea .receipt .r span:last-child {
@@ -3173,6 +3201,7 @@ renderGrid(); renderCart();
 
   #printArea .receipt .ind {
     padding-left: 3mm !important;
+
     font-size: 9px !important;
   }
 }
