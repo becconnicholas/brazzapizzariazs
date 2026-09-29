@@ -2876,5 +2876,373 @@ renderGrid(); renderCart();
 
 })();
 
-</script></body>
+</script>
+```html
+<!-- =========================================================
+     LOGIN - BRAZZA PIZZARIA
+     Cole este bloco imediatamente antes de </body>
+     ========================================================= -->
+
+<style>
+  /* Tela de login */
+  #loginScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background:
+      radial-gradient(circle at top, rgba(255,255,255,.08), transparent 35%),
+      #111;
+  }
+
+  #loginScreen.hidden {
+    display: none;
+  }
+
+  .login-box {
+    width: 100%;
+    max-width: 380px;
+    padding: 32px 26px;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    text-align: center;
+  }
+
+  .login-logo {
+    font-size: 34px;
+    font-weight: 900;
+    margin-bottom: 6px;
+  }
+
+  .login-subtitle {
+    margin-bottom: 24px;
+    color: #666;
+    font-size: 14px;
+  }
+
+  .login-box label {
+    display: block;
+    margin: 14px 0 6px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .login-box input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 14px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 16px;
+    outline: none;
+  }
+
+  .login-box input:focus {
+    border-color: #111;
+    box-shadow: 0 0 0 3px rgba(0,0,0,.08);
+  }
+
+  #loginButton {
+    width: 100%;
+    margin-top: 22px;
+    padding: 14px;
+    border: 0;
+    border-radius: 10px;
+    background: #111;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  #loginButton:hover {
+    opacity: .9;
+  }
+
+  #loginError {
+    min-height: 20px;
+    margin-top: 12px;
+    color: #c62828;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .login-user-info {
+    margin-top: 18px;
+    color: #777;
+    font-size: 12px;
+  }
+
+  /* Botão sair */
+  #logoutButton {
+    position: fixed;
+    right: 14px;
+    bottom: 14px;
+    z-index: 99990;
+    display: none;
+    padding: 9px 13px;
+    border: 0;
+    border-radius: 9px;
+    background: #222;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  }
+
+  #logoutButton.visible {
+    display: block;
+  }
+</style>
+
+<div id="loginScreen">
+  <div class="login-box">
+
+    <div class="login-logo">🍕 Brazza Pizzaria</div>
+
+    <div class="login-subtitle">
+      Acesso ao sistema
+    </div>
+
+    <form id="loginForm" autocomplete="off">
+
+      <label for="loginUser">Usuário</label>
+      <input
+        id="loginUser"
+        type="text"
+        autocomplete="username"
+        placeholder="Digite seu usuário"
+        required
+      >
+
+      <label for="loginPassword">Senha</label>
+      <input
+        id="loginPassword"
+        type="password"
+        autocomplete="current-password"
+        placeholder="Digite sua senha"
+        required
+      >
+
+      <button id="loginButton" type="submit">
+        Entrar
+      </button>
+
+      <div id="loginError"></div>
+
+    </form>
+
+    <div class="login-user-info">
+      Acesso autorizado somente para usuários cadastrados.
+    </div>
+
+  </div>
+</div>
+
+<button id="logoutButton" type="button">
+  Sair
+</button>
+
+<script>
+(function(){
+
+  /* =========================================================
+     USUÁRIOS
+     ========================================================= */
+
+  const USERS = {
+    nicholas: '4912',
+    leandro: '1234'
+  };
+
+
+  /* =========================================================
+     ELEMENTOS
+     ========================================================= */
+
+  const loginScreen =
+    document.getElementById('loginScreen');
+
+  const loginForm =
+    document.getElementById('loginForm');
+
+  const loginUser =
+    document.getElementById('loginUser');
+
+  const loginPassword =
+    document.getElementById('loginPassword');
+
+  const loginError =
+    document.getElementById('loginError');
+
+  const logoutButton =
+    document.getElementById('logoutButton');
+
+
+  /* =========================================================
+     CONTROLE DE ACESSO
+     ========================================================= */
+
+  function getSession(){
+
+    try {
+      return sessionStorage.getItem(
+        'brazza_logged_user'
+      );
+    } catch(e) {
+      return null;
+    }
+
+  }
+
+
+  function setSession(user){
+
+    try {
+      sessionStorage.setItem(
+        'brazza_logged_user',
+        user
+      );
+    } catch(e) {}
+
+  }
+
+
+  function clearSession(){
+
+    try {
+      sessionStorage.removeItem(
+        'brazza_logged_user'
+      );
+    } catch(e) {}
+
+  }
+
+
+  function showSystem(){
+
+    loginScreen.classList.add('hidden');
+
+    logoutButton.classList.add('visible');
+
+    document.body.classList.remove(
+      'brazza-locked'
+    );
+
+  }
+
+
+  function showLogin(){
+
+    loginScreen.classList.remove('hidden');
+
+    logoutButton.classList.remove('visible');
+
+    loginUser.value = '';
+    loginPassword.value = '';
+    loginError.textContent = '';
+
+    setTimeout(function(){
+      loginUser.focus();
+    }, 100);
+
+  }
+
+
+  /* =========================================================
+     LOGIN
+     ========================================================= */
+
+  loginForm.addEventListener(
+    'submit',
+    function(event){
+
+      event.preventDefault();
+
+      const user =
+        loginUser.value
+          .trim()
+          .toLowerCase();
+
+      const password =
+        loginPassword.value;
+
+      if(
+        USERS[user] &&
+        USERS[user] === password
+      ){
+
+        setSession(user);
+
+        loginError.textContent = '';
+
+        showSystem();
+
+      } else {
+
+        loginError.textContent =
+          'Usuário ou senha incorretos.';
+
+        loginPassword.value = '';
+
+        loginPassword.focus();
+
+      }
+
+    }
+  );
+
+
+  /* =========================================================
+     LOGOUT
+     ========================================================= */
+
+  logoutButton.addEventListener(
+    'click',
+    function(){
+
+      if(
+        confirm('Deseja sair do sistema?')
+      ){
+
+        clearSession();
+
+        showLogin();
+
+      }
+
+    }
+  );
+
+
+  /* =========================================================
+     INICIALIZAÇÃO
+     ========================================================= */
+
+  const currentUser = getSession();
+
+  if(
+    currentUser &&
+    USERS[currentUser]
+  ){
+
+    showSystem();
+
+  } else {
+
+    showLogin();
+
+  }
+
+})();
+</script>
+```
+
+</body>
 </html>
