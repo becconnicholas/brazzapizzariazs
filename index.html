@@ -698,16 +698,15 @@ function printOrder(id){
 
   printArea.innerHTML = receiptHTML(o);
 
-  // Aguarda o navegador renderizar o recibo
   setTimeout(() => {
     window.print();
 
     setTimeout(() => {
       printArea.innerHTML = '';
     }, 1000);
-  }, 300);
-}
 
+  }, 200);
+}
 /* ---------- pedidos ---------- */
 function renderOrders(){
   const k = $('#ordDate').value;
