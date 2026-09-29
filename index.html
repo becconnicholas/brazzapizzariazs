@@ -205,11 +205,7 @@ main{padding:16px 20px 90px;max-width:1500px;margin:0 auto}
   .menu-row .field.wide{grid-column:1/-1}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-@media print{
-  body>*{display:none!important}
-  body>#printArea{display:block!important;width:76mm;margin:0}
-  @page{margin:4mm}
-}
+
 </style>
 </head>
 <body>
@@ -3089,20 +3085,20 @@ renderGrid(); renderCart();
 @media print {
 
   @page {
-    size: 58mm 120mm;
+    size: 54mm 120mm;
     margin: 0 !important;
   }
 
   html {
-    width: 58mm !important;
+    width: 54mm !important;
     margin: 0 !important;
     padding: 0 !important;
   }
 
   body {
-    width: 58mm !important;
-    min-width: 58mm !important;
-    max-width: 58mm !important;
+    width: 54mm !important;
+    min-width: 54mm !important;
+    max-width: 54mm !important;
 
     margin: 0 !important;
     padding: 0 !important;
