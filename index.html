@@ -3182,7 +3182,8 @@ renderGrid(); renderCart();
 
         loginError.textContent = '';
 
-        showSystem();
+        console.log('LOGIN OK');
+showSystem();
 
       } else {
 
@@ -3225,20 +3226,27 @@ renderGrid(); renderCart();
      INICIALIZAÇÃO
      ========================================================= */
 
-  const currentUser = getSession();
+const currentUser = getSession();
 
-  if(
-    currentUser &&
-    USERS[currentUser]
-  ){
+if(
+  currentUser &&
+  USERS[currentUser]
+){
 
-    showSystem();
+  showSystem();
 
-  } else {
-
-    showLogin();
-
+  try {
+    renderCart();
+    renderOrders();
+  } catch(e) {
+    alert('ERRO AO CARREGAR O PDV:\n' + e.message);
   }
+
+} else {
+
+  showLogin();
+
+}
 
 })();
 </script>
