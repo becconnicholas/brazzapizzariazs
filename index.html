@@ -332,11 +332,6 @@ main{padding:16px 20px 90px;max-width:1500px;margin:0 auto}
 const SUPABASE_URL = 'https://xhhwovhpanksltwqnnpv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_vEDvr4Q3hp5klFo3i8wF1g_3wAYj_6R';
 
-const sb = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
- 
 /* ---------- utilidades ---------- */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
