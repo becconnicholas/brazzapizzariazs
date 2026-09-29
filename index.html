@@ -3078,146 +3078,13 @@ renderGrid(); renderCart();
   #logoutButton.visible {
     display: block;
   }
-  /* =========================================================
-   IMPRESSÃO AUTOMÁTICA - OASIS OIA-8387 - BOBINA 58mm
-   ========================================================= */
+/* IMPRESSÃO AUTOMÁTICA - OASIS OIA-8387 - BOBINA 58mm */
 
 #printArea {
   display: none;
 }
 
 @media print {
-
-  @page {
-    margin: 0;
-  }
-
-  body {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #fff !important;
-  }
-
-  body > * {
-    display: none !important;
-  }
-
-  #printArea {
-    display: block !important;
-
-    width: 58mm !important;
-    max-width: 58mm !important;
-
-    margin: 0 !important;
-    padding: 0 !important;
-
-    background: #fff !important;
-    color: #000 !important;
-  }
-
-  #printArea .receipt {
-    display: block !important;
-
-    width: 54mm !important;
-    max-width: 54mm !important;
-
-    box-sizing: border-box !important;
-
-    margin: 0 !important;
-    padding: 2mm !important;
-
-    font-family: Arial, sans-serif !important;
-    font-size: 10px !important;
-    line-height: 1.2 !important;
-
-    color: #000 !important;
-    background: #fff !important;
-
-    overflow-wrap: break-word !important;
-    word-wrap: break-word !important;
-  }
-
-  #printArea .receipt h3 {
-    text-align: center !important;
-    font-size: 16px !important;
-    margin: 0 0 2mm 0 !important;
-  }
-
-  #printArea .receipt .c {
-    text-align: center !important;
-  }
-
-  #printArea .receipt hr {
-    border: 0 !important;
-    border-top: 1px dashed #000 !important;
-    margin: 2mm 0 !important;
-  }
-
-  #printArea .receipt .r {
-    display: flex !important;
-    justify-content: space-between !important;
-    gap: 2mm !important;
-    width: 100% !important;
-  }
-
-  #printArea .receipt .b {
-    font-weight: bold !important;
-  }
-
-  #printArea .receipt .ind {
-    padding-left: 3mm !important;
-    font-size: 9px !important;
-  }
-}
-  #printArea .receipt {
-    width: 58mm;
-    max-width: 58mm;
-    box-sizing: border-box;
-    padding: 2mm 2mm;
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 11px;
-    line-height: 1.25;
-    color: #000;
-  }
-
-  #printArea .receipt h3 {
-    text-align: center;
-    font-size: 17px;
-    margin: 0 0 4px;
-    color: #000;
-  }
-
-  #printArea .receipt .c {
-    text-align: center;
-  }
-
-  #printArea .receipt hr {
-    border: 0;
-    border-top: 1px dashed #000;
-    margin: 6px 0;
-  }
-
-  #printArea .receipt .r {
-    display: flex;
-    justify-content: space-between;
-    gap: 5px;
-  }
-
-  #printArea .receipt .b {
-    font-weight: 700;
-  }
-
-  #printArea .receipt .ind {
-    padding-left: 8px;
-    font-size: 10px;
-  }
-
-  @page {
-    margin: 0;
-  }
-}
-  /* @media print {
 
   @page {
     margin: 0;
@@ -3236,11 +3103,13 @@ renderGrid(); renderCart();
 
   #printArea {
     display: block !important;
-    width: 100% !important;
-    max-width: none !important;
+    width: 58mm !important;
+    max-width: 58mm !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
+    background: #fff !important;
+    color: #000 !important;
   }
 
   #printArea .receipt {
@@ -3249,15 +3118,12 @@ renderGrid(); renderCart();
     width: 54mm !important;
     max-width: 54mm !important;
 
-    min-height: 0 !important;
-    height: auto !important;
-
     box-sizing: border-box !important;
 
     margin: 0 !important;
     padding: 2mm !important;
 
-    font-family: Arial, sans-serif !important;
+    font-family: Arial, Helvetica, sans-serif !important;
     font-size: 10px !important;
     line-height: 1.2 !important;
 
@@ -3269,38 +3135,6 @@ renderGrid(); renderCart();
   }
 
   #printArea .receipt h3 {
-    text-align: center !important;
-    font-size: 16px !important;
-    margin: 0 0 2mm 0 !important;
-  }
-
-  #printArea .receipt .c {
-    text-align: center !important;
-  }
-
-  #printArea .receipt hr {
-    border: 0 !important;
-    border-top: 1px dashed #000 !important;
-    margin: 2mm 0 !important;
-  }
-
-  #printArea .receipt .r {
-    display: flex !important;
-    justify-content: space-between !important;
-    gap: 2mm !important;
-    width: 100% !important;
-  }
-
-  #printArea .receipt .b {
-    font-weight: bold !important;
-  }
-
-  #printArea .receipt .ind {
-    padding-left: 3mm !important;
-    font-size: 9px !important;
-  }
-}
-  #printArea .receipt h3 {
     margin: 0 0 2mm 0 !important;
     text-align: center !important;
     font-size: 16px !important;
@@ -3319,6 +3153,7 @@ renderGrid(); renderCart();
   #printArea .receipt .r {
     display: flex !important;
     justify-content: space-between !important;
+    align-items: flex-start !important;
     width: 100% !important;
     gap: 2mm !important;
   }
