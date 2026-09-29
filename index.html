@@ -325,9 +325,17 @@ main{padding:16px 20px 90px;max-width:1500px;margin:0 auto}
 <div class="modal" id="modal" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
 <div id="printArea"></div>
 <div class="toast" id="toast" hidden></div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
 <script>
 'use strict';
+  const SUPABASE_URL = https://xhhwovhpanksltwqnnpv.supabase.co;
+const SUPABASE_ANON_KEY = sb_publishable_vEDvr4Q3hp5klFo3i8wF1g_3wAYj_6R;
+
+const sb = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 /* ---------- utilidades ---------- */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
