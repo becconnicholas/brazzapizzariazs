@@ -590,29 +590,15 @@ function finish(){
 S.orders.push(order);
 save();
 
-sb.from('orders').insert({
-  user_name: getSession() || '',
-  customer: order.customer,
-  phone: order.phone,
-  address: order.addr,
-  mesa: order.mesa,
-  items: order.items,
-  subtotal: order.subtotal,
-  discount: order.discount,
-  fee: order.fee,
-  total: order.total,
-  pay: order.pay,
-  received: order.received,
-  change_amount: order.change,
-  status: order.status
-.then(({ error }) => {
-  if (error) {
-    console.error('Erro ao salvar pedido no Supabase:', error);
-    alert('ERRO SUPABASE:\n' + error.message + '\n\n' + error.details);
-  } else {
-    alert('PEDIDO SALVO NO SUPABASE!');
-  }
-});
+S.orders.push(order);
+save();
+
+const keepType = C.type;
+C = newCart(keepType);
+resetForm();
+renderCart();
+$('#cart').classList.remove('open');
+showReceipt(order, true);
 const keepType = C.type;
 C = newCart(keepType);
 resetForm();
