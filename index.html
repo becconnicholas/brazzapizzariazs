@@ -576,6 +576,42 @@ function resetForm(){
 }
 
 /* ---------- finalizar ---------- */
+  async function enviarPedidoSupabase(order){
+  if(!sb) return;
+
+  try {
+    const { error } = await sb.from('orders').insert({
+      user_name: getSession() || '',
+      customer: order.customer,
+      phone: order.phone,
+      adress: order.addr,
+      mesa: order.mesa,
+      items: order.items,
+      subtotal: order.subtotal,
+      discount: order.discount,
+      fee: order.fee,
+      total: order.total,
+      pay: order.pay,
+      received: order.received,
+      change_amount: order.change,
+      status: order.status
+    });
+
+    if(error){
+      console.error('Erro Supabase:', error);
+      alert('ERRO AO SALVAR NO SUPABASE:\n' + error.message);
+      return false;
+    }
+
+    console.log('PEDIDO SALVO NO SUPABASE!');
+    return true;
+
+  }catch(e){
+    console.error('Erro Supabase:', e);
+    alert('ERRO AO CONECTAR AO SUPABASE:\n' + e.message);
+    return false;
+  }
+}
 function finish(){
   if(!C.items.length) return;
   const t = calc();
