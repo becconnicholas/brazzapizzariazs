@@ -3087,20 +3087,88 @@ renderGrid(); renderCart();
 }
 
 @media print {
+
+  @page {
+    margin: 0;
+  }
+
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
   body > * {
     display: none !important;
   }
 
   #printArea {
     display: block !important;
+
     width: 58mm !important;
     max-width: 58mm !important;
+
     margin: 0 !important;
     padding: 0 !important;
+
     background: #fff !important;
     color: #000 !important;
   }
 
+  #printArea .receipt {
+    display: block !important;
+
+    width: 54mm !important;
+    max-width: 54mm !important;
+
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+    padding: 2mm !important;
+
+    font-family: Arial, sans-serif !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+
+    color: #000 !important;
+    background: #fff !important;
+
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+  }
+
+  #printArea .receipt h3 {
+    text-align: center !important;
+    font-size: 16px !important;
+    margin: 0 0 2mm 0 !important;
+  }
+
+  #printArea .receipt .c {
+    text-align: center !important;
+  }
+
+  #printArea .receipt hr {
+    border: 0 !important;
+    border-top: 1px dashed #000 !important;
+    margin: 2mm 0 !important;
+  }
+
+  #printArea .receipt .r {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 2mm !important;
+    width: 100% !important;
+  }
+
+  #printArea .receipt .b {
+    font-weight: bold !important;
+  }
+
+  #printArea .receipt .ind {
+    padding-left: 3mm !important;
+    font-size: 9px !important;
+  }
+}
   #printArea .receipt {
     width: 58mm;
     max-width: 58mm;
@@ -3149,30 +3217,17 @@ renderGrid(); renderCart();
     margin: 0;
   }
 }
-  /* IMPRESSÃO OASIS OIA-8387 - BOBINA 58MM */
-
-#printArea {
-  display: none;
-}
-
-@media print {
+  /* @media print {
 
   @page {
-    size: 58mm auto;
     margin: 0;
   }
 
   html,
   body {
-    width: 58mm !important;
-    min-width: 58mm !important;
-    max-width: 58mm !important;
     margin: 0 !important;
     padding: 0 !important;
-  }
-
-  body {
-    background: white !important;
+    background: #fff !important;
   }
 
   body > * {
@@ -3181,8 +3236,8 @@ renderGrid(); renderCart();
 
   #printArea {
     display: block !important;
-    width: 58mm !important;
-    max-width: 58mm !important;
+    width: 100% !important;
+    max-width: none !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
@@ -3190,8 +3245,10 @@ renderGrid(); renderCart();
 
   #printArea .receipt {
     display: block !important;
-    width: 58mm !important;
-    max-width: 58mm !important;
+
+    width: 54mm !important;
+    max-width: 54mm !important;
+
     min-height: 0 !important;
     height: auto !important;
 
@@ -3206,8 +3263,43 @@ renderGrid(); renderCart();
 
     color: #000 !important;
     background: #fff !important;
+
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
   }
 
+  #printArea .receipt h3 {
+    text-align: center !important;
+    font-size: 16px !important;
+    margin: 0 0 2mm 0 !important;
+  }
+
+  #printArea .receipt .c {
+    text-align: center !important;
+  }
+
+  #printArea .receipt hr {
+    border: 0 !important;
+    border-top: 1px dashed #000 !important;
+    margin: 2mm 0 !important;
+  }
+
+  #printArea .receipt .r {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 2mm !important;
+    width: 100% !important;
+  }
+
+  #printArea .receipt .b {
+    font-weight: bold !important;
+  }
+
+  #printArea .receipt .ind {
+    padding-left: 3mm !important;
+    font-size: 9px !important;
+  }
+}
   #printArea .receipt h3 {
     margin: 0 0 2mm 0 !important;
     text-align: center !important;
