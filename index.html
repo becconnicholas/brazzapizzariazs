@@ -326,16 +326,8 @@ main{padding:16px 20px 90px;max-width:1500px;margin:0 auto}
 <div id="printArea"></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 'use strict';
-  const SUPABASE_URL = 'https://xhhwovhpanksltwqnnpv.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_vEDvr4Q3hp5klFo3i8wF1g_3wAYj_6R';
-
-const sb = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
 /* ---------- utilidades ---------- */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -587,24 +579,11 @@ function finish(){
     change: C.pay==='Dinheiro' && recv>t.total ? Math.round((recv-t.total)*100)/100 : 0,
     status: 'novo'
   };
-S.orders.push(order);
-save();
-
-S.orders.push(order);
-save();
-
-const keepType = C.type;
-C = newCart(keepType);
-resetForm();
-renderCart();
-$('#cart').classList.remove('open');
-showReceipt(order, true);
-const keepType = C.type;
-C = newCart(keepType);
-resetForm();
-renderCart();
-$('#cart').classList.remove('open');
-showReceipt(order, true);
+  S.orders.push(order); save();
+  const keepType = C.type;
+  C = newCart(keepType); resetForm(); renderCart();
+  $('#cart').classList.remove('open');
+  showReceipt(order, true);
 }
 
 function typeLabel(o){ return o.type==='entrega' ? 'Entrega' : o.type==='mesa' ? 'Mesa '+o.mesa : 'Balcão'; }
