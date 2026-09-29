@@ -610,6 +610,7 @@ function finish(){
   };
 S.orders.push(order);
 save();
+  
   const keepType = C.type;
   C = newCart(keepType); resetForm(); renderCart();
   $('#cart').classList.remove('open');
