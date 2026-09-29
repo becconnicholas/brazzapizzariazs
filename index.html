@@ -336,6 +336,16 @@ const sb = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
+  sb.from('orders')
+  .select('id')
+  .limit(1)
+  .then(({ data, error }) => {
+    if (error) {
+      alert('ERRO SUPABASE:\n' + error.message);
+    } else {
+      alert('SUPABASE CONECTADO!\nLinhas encontradas: ' + data.length);
+    }
+  });
 /* ---------- utilidades ---------- */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
