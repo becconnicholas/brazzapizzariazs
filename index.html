@@ -1884,5 +1884,996 @@ renderGrid(); renderCart();
 
 })();
 </script>
-</body>
+<!-- =========================================================
+     RELATÓRIO MENSAL - BRAZZA PIZZARIA
+     Cole este bloco imediatamente antes de </body>
+     ========================================================= -->
+<style>
+  .monthly-report{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  .report-actions{
+    display:flex;
+    gap:10px;
+    align-items:end;
+    flex-wrap:wrap;
+    margin-bottom:2px;
+  }
+
+  .report-actions .field{
+    min-width:180px;
+  }
+
+  .report-table-wrap{
+    background:var(--card);
+    border:1.5px solid var(--line);
+    border-radius:var(--r);
+    overflow:auto;
+  }
+
+  .report-table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:850px;
+    font-size:13px;
+  }
+
+  .report-table th{
+    background:var(--green);
+    color:#fff;
+    padding:10px 9px;
+    text-align:left;
+    white-space:nowrap;
+    position:sticky;
+    top:0;
+    z-index:2;
+  }
+
+  .report-table td{
+    padding:9px;
+    border-bottom:1px solid var(--line);
+    white-space:nowrap;
+  }
+
+  .report-table tbody tr:hover{
+    background:var(--green-l);
+  }
+
+  .report-table .number{
+    text-align:right;
+  }
+
+  .report-table .total-row{
+    font-weight:800;
+    background:var(--bg);
+  }
+
+  .report-table .product-name{
+    font-weight:700;
+    position:sticky;
+    left:0;
+    background:var(--card);
+    z-index:1;
+  }
+
+  .report-table .total-row .product-name{
+    background:var(--bg);
+  }
+
+  .report-section-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:4px 0 0;
+  }
+
+  .report-section-title h3{
+    font-size:20px;
+    margin-right:auto;
+  }
+
+  .report-note{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:-8px;
+  }
+
+  .report-ok{
+    color:var(--green);
+    font-weight:700;
+  }
+
+  .report-open{
+    color:var(--red);
+    font-weight:700;
+  }
+
+  .report-summary{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:12px;
+  }
+
+  .report-summary .stat b{
+    font-size:26px;
+  }
+
+  @media(max-width:959px){
+    .report-table{
+      min-width:760px;
+    }
+
+    .report-actions{
+      align-items:stretch;
+    }
+
+    .report-actions .field{
+      width:100%;
+    }
+  }
+
+  @media print{
+    body > *{
+      display:none!important;
+    }
+
+    body > #monthlyPrintArea{
+      display:block!important;
+      position:static!important;
+      width:100%!important;
+      padding:0!important;
+      margin:0!important;
+      background:#fff!important;
+    }
+
+    #monthlyPrintArea *{
+      color:#000!important;
+      background:#fff!important;
+    }
+
+    #monthlyPrintArea table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:9px;
+    }
+
+    #monthlyPrintArea th,
+    #monthlyPrintArea td{
+      border:1px solid #999;
+      padding:4px;
+    }
+
+    #monthlyPrintArea th{
+      font-weight:700;
+    }
+
+    @page{
+      size:A4 landscape;
+      margin:8mm;
+    }
+  }
+</style>
+
+<script>
+(function(){
+
+  /* ---------------------------------------------------------
+     CRIA A ABA RELATÓRIO
+     --------------------------------------------------------- */
+
+  const nav = document.querySelector('.tabs');
+
+  if(nav && !nav.querySelector('[data-tab="relatorio"]')){
+    const btn = document.createElement('button');
+    btn.className = 'tab';
+    btn.setAttribute('role','tab');
+    btn.setAttribute('aria-selected','false');
+    btn.dataset.tab = 'relatorio';
+    btn.textContent = 'Relatório';
+
+    const caixaTab = nav.querySelector('[data-tab="caixa"]');
+
+    if(caixaTab && caixaTab.nextSibling){
+      nav.insertBefore(btn, caixaTab.nextSibling);
+    }else{
+      nav.appendChild(btn);
+    }
+  }
+
+  /* ---------------------------------------------------------
+     CRIA A ÁREA DO RELATÓRIO
+     --------------------------------------------------------- */
+
+  if(!document.getElementById('v-relatorio')){
+    const section = document.createElement('section');
+
+    section.id = 'v-relatorio';
+    section.hidden = true;
+
+    section.innerHTML = `
+      <div class="view-head">
+        <h2>Relatório mensal</h2>
+      </div>
+
+      <div class="monthly-report">
+
+        <div class="report-actions">
+
+          <div class="field">
+            <label for="repMonth">Mês</label>
+            <input type="month" id="repMonth">
+          </div>
+
+          <button class="btn" data-a="monthlyCsv">
+            Exportar CSV mensal
+          </button>
+
+          <button class="btn alt" data-a="printMonthly">
+            Imprimir relatório
+          </button>
+
+        </div>
+
+        <div id="monthlySummary" class="report-summary"></div>
+
+        <div class="report-section-title">
+          <h3>Faturamento e fechamento dia a dia</h3>
+        </div>
+
+        <p class="report-note">
+          O faturamento considera somente pedidos que não foram cancelados.
+          Os dias sem vendas também aparecem no relatório.
+        </p>
+
+        <div class="report-table-wrap">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th class="number">Pedidos</th>
+                <th class="number">Faturamento</th>
+                <th class="number">Dinheiro</th>
+                <th class="number">Outros</th>
+                <th>Fechamento</th>
+                <th class="number">Diferença</th>
+              </tr>
+            </thead>
+            <tbody id="monthlyDailyBody"></tbody>
+          </table>
+        </div>
+
+        <div class="report-section-title">
+          <h3>Produtos vendidos no mês</h3>
+        </div>
+
+        <p class="report-note">
+          Cada produto mostra a quantidade vendida no mês, o faturamento
+          do produto e a quantidade vendida em cada dia.
+        </p>
+
+        <div class="report-table-wrap">
+          <table class="report-table">
+            <thead id="monthlyProductsHead"></thead>
+            <tbody id="monthlyProductsBody"></tbody>
+          </table>
+        </div>
+
+      </div>
+    `;
+
+    const main = document.querySelector('main');
+
+    if(main){
+      main.appendChild(section);
+    }
+  }
+
+  /* ---------------------------------------------------------
+     ÁREA DE IMPRESSÃO
+     --------------------------------------------------------- */
+
+  if(!document.getElementById('monthlyPrintArea')){
+    const print = document.createElement('div');
+    print.id = 'monthlyPrintArea';
+    print.hidden = true;
+    document.body.appendChild(print);
+  }
+
+  /* ---------------------------------------------------------
+     FUNÇÕES DO RELATÓRIO
+     --------------------------------------------------------- */
+
+  function reportMonthKey(ts){
+    const d = new Date(ts);
+    return d.getFullYear() + '-' +
+      String(d.getMonth()+1).padStart(2,'0');
+  }
+
+  function reportMonthDays(month){
+    const [year, monthNumber] = month.split('-').map(Number);
+
+    if(!year || !monthNumber) return [];
+
+    const days = [];
+    const lastDay = new Date(year, monthNumber, 0).getDate();
+
+    for(let day=1; day<=lastDay; day++){
+      days.push(
+        year + '-' +
+        String(monthNumber).padStart(2,'0') + '-' +
+        String(day).padStart(2,'0')
+      );
+    }
+
+    return days;
+  }
+
+  function reportMonthLabel(month){
+    const [year, monthNumber] = month.split('-').map(Number);
+
+    if(!year || !monthNumber) return month;
+
+    return new Date(year, monthNumber-1, 1)
+      .toLocaleDateString('pt-BR',{
+        month:'long',
+        year:'numeric'
+      });
+  }
+
+  function reportMoney(n){
+    return money(Number(n)||0);
+  }
+
+  function reportDayLabel(k){
+    const [y,m,d] = k.split('-');
+
+    return d + '/' + m + '/' + y;
+  }
+
+  function reportClosingStatus(closing){
+    if(!closing){
+      return '<span class="report-open">Não fechado</span>';
+    }
+
+    return '<span class="report-ok">Fechado</span>';
+  }
+
+  function reportClosingDiff(closing){
+    if(!closing) return '—';
+
+    const diff = Number(closing.diff)||0;
+
+    if(diff === 0){
+      return 'R$ 0,00';
+    }
+
+    return (diff > 0 ? '+ ' : '− ') +
+      reportMoney(Math.abs(diff));
+  }
+
+  function buildMonthlyReport(month){
+
+    const days = reportMonthDays(month);
+
+    const orders = S.orders.filter(o =>
+      reportMonthKey(o.ts) === month &&
+      o.status !== 'cancelado'
+    );
+
+    const cancelled = S.orders.filter(o =>
+      reportMonthKey(o.ts) === month &&
+      o.status === 'cancelado'
+    ).length;
+
+    const daily = {};
+    const products = {};
+
+    days.forEach(day => {
+      daily[day] = {
+        orders:0,
+        revenue:0,
+        cash:0,
+        other:0,
+        closing:S.closings[day] || null
+      };
+    });
+
+    orders.forEach(order => {
+
+      const day = dayKey(order.ts);
+
+      if(!daily[day]){
+        daily[day] = {
+          orders:0,
+          revenue:0,
+          cash:0,
+          other:0,
+          closing:S.closings[day] || null
+        };
+      }
+
+      daily[day].orders++;
+      daily[day].revenue += Number(order.total)||0;
+
+      if(order.pay === 'Dinheiro'){
+        daily[day].cash += Number(order.total)||0;
+      }else{
+        daily[day].other += Number(order.total)||0;
+      }
+
+      order.items.forEach(item => {
+
+        const name = item.name;
+        const qty = Number(item.qty)||0;
+        const revenue =
+          (Number(item.unit)||0) * qty;
+
+        if(!products[name]){
+          products[name] = {
+            name:name,
+            qty:0,
+            revenue:0,
+            days:{}
+          };
+        }
+
+        products[name].qty += qty;
+        products[name].revenue += revenue;
+
+        if(!products[name].days[day]){
+          products[name].days[day] = 0;
+        }
+
+        products[name].days[day] += qty;
+      });
+    });
+
+    return {
+      month,
+      days,
+      orders,
+      cancelled,
+      daily,
+      products
+    };
+  }
+
+  function renderMonthlyReport(){
+
+    const monthInput = document.getElementById('repMonth');
+
+    if(!monthInput) return;
+
+    const month = monthInput.value ||
+      new Date().toISOString().slice(0,7);
+
+    monthInput.value = month;
+
+    const data = buildMonthlyReport(month);
+
+    const totalRevenue = data.orders.reduce(
+      (sum,o) => sum + (Number(o.total)||0),
+      0
+    );
+
+    const daysWithSales = data.days.filter(
+      d => data.daily[d].orders > 0
+    ).length;
+
+    const closingCount = data.days.filter(
+      d => data.daily[d].closing
+    ).length;
+
+    document.getElementById('monthlySummary').innerHTML = `
+      <div class="stat hero">
+        <small>Faturamento do mês</small>
+        <b>${reportMoney(totalRevenue)}</b>
+      </div>
+
+      <div class="stat">
+        <small>Dias com vendas</small>
+        <b>${daysWithSales}</b>
+      </div>
+
+      <div class="stat">
+        <small>Fechamentos realizados</small>
+        <b>${closingCount}/${data.days.length}</b>
+      </div>
+
+      <div class="stat">
+        <small>Pedidos cancelados</small>
+        <b>${data.cancelled}</b>
+      </div>
+    `;
+
+    /* -------------------------------------------------------
+       TABELA DIÁRIA
+       ------------------------------------------------------- */
+
+    let dailyHTML = '';
+
+    let monthCash = 0;
+    let monthOther = 0;
+
+    data.days.forEach(day => {
+
+      const d = data.daily[day];
+
+      monthCash += d.cash;
+      monthOther += d.other;
+
+      dailyHTML += `
+        <tr>
+          <td><b>${reportDayLabel(day)}</b></td>
+          <td class="number">${d.orders}</td>
+          <td class="number"><b>${reportMoney(d.revenue)}</b></td>
+          <td class="number">${reportMoney(d.cash)}</td>
+          <td class="number">${reportMoney(d.other)}</td>
+          <td>${reportClosingStatus(d.closing)}</td>
+          <td class="number">${reportClosingDiff(d.closing)}</td>
+        </tr>
+      `;
+    });
+
+    dailyHTML += `
+      <tr class="total-row">
+        <td>TOTAL DO MÊS</td>
+        <td class="number">${data.orders.length}</td>
+        <td class="number">${reportMoney(totalRevenue)}</td>
+        <td class="number">${reportMoney(monthCash)}</td>
+        <td class="number">${reportMoney(monthOther)}</td>
+        <td>${closingCount} fechamento(s)</td>
+        <td></td>
+      </tr>
+    `;
+
+    document.getElementById('monthlyDailyBody').innerHTML =
+      dailyHTML;
+
+    /* -------------------------------------------------------
+       TABELA DE PRODUTOS
+       ------------------------------------------------------- */
+
+    const productList = Object.values(data.products)
+      .sort((a,b) => b.revenue - a.revenue);
+
+    const head = `
+      <tr>
+        <th>Produto</th>
+        <th class="number">Qtd. mês</th>
+        <th class="number">Faturamento mês</th>
+        ${data.days.map(day =>
+          `<th class="number">${reportDayLabel(day)}</th>`
+        ).join('')}
+      </tr>
+    `;
+
+    document.getElementById('monthlyProductsHead').innerHTML =
+      head;
+
+    let productHTML = '';
+
+    productList.forEach(product => {
+
+      productHTML += `
+        <tr>
+          <td class="product-name">${esc(product.name)}</td>
+
+          <td class="number">
+            <b>${product.qty}</b>
+          </td>
+
+          <td class="number">
+            <b>${reportMoney(product.revenue)}</b>
+          </td>
+
+          ${data.days.map(day => `
+            <td class="number">
+              ${product.days[day] || 0}
+            </td>
+          `).join('')}
+        </tr>
+      `;
+    });
+
+    if(!productList.length){
+      productHTML = `
+        <tr>
+          <td colspan="${data.days.length + 3}"
+              class="empty">
+            Nenhuma venda registrada neste mês.
+          </td>
+        </tr>
+      `;
+    }else{
+
+      const totalQty = productList.reduce(
+        (sum,p) => sum + p.qty, 0
+      );
+
+      const totalProductRevenue = productList.reduce(
+        (sum,p) => sum + p.revenue, 0
+      );
+
+      productHTML += `
+        <tr class="total-row">
+          <td class="product-name">TOTAL</td>
+
+          <td class="number">
+            ${totalQty}
+          </td>
+
+          <td class="number">
+            ${reportMoney(totalProductRevenue)}
+          </td>
+
+          ${data.days.map(day => {
+
+            const qty = productList.reduce(
+              (sum,p) => sum + (p.days[day] || 0),
+              0
+            );
+
+            return `
+              <td class="number">${qty}</td>
+            `;
+          }).join('')}
+        </tr>
+      `;
+    }
+
+    document.getElementById('monthlyProductsBody').innerHTML =
+      productHTML;
+  }
+
+  /* ---------------------------------------------------------
+     CSV
+     --------------------------------------------------------- */
+
+  function csvEscape(value){
+    return '"' +
+      String(value ?? '')
+        .replace(/"/g,'""') +
+      '"';
+  }
+
+  function exportMonthlyCSV(){
+
+    const month =
+      document.getElementById('repMonth').value;
+
+    if(!month) return;
+
+    const data = buildMonthlyReport(month);
+
+    const rows = [];
+
+    rows.push([
+      'RELATÓRIO MENSAL BRAZZA PIZZARIA',
+      reportMonthLabel(month)
+    ]);
+
+    rows.push([]);
+
+    rows.push([
+      'DATA',
+      'PEDIDOS',
+      'FATURAMENTO',
+      'DINHEIRO',
+      'OUTROS',
+      'FECHAMENTO',
+      'DIFERENÇA'
+    ]);
+
+    let totalRevenue = 0;
+    let totalCash = 0;
+    let totalOther = 0;
+    let totalOrders = 0;
+
+    data.days.forEach(day => {
+
+      const d = data.daily[day];
+
+      totalRevenue += d.revenue;
+      totalCash += d.cash;
+      totalOther += d.other;
+      totalOrders += d.orders;
+
+      rows.push([
+        reportDayLabel(day),
+        d.orders,
+        d.revenue.toFixed(2).replace('.',','),
+        d.cash.toFixed(2).replace('.',','),
+        d.other.toFixed(2).replace('.',','),
+        d.closing ? 'Fechado' : 'Não fechado',
+        d.closing
+          ? Number(d.closing.diff || 0)
+              .toFixed(2)
+              .replace('.',',')
+          : ''
+      ]);
+    });
+
+    rows.push([
+      'TOTAL DO MÊS',
+      totalOrders,
+      totalRevenue.toFixed(2).replace('.',','),
+      totalCash.toFixed(2).replace('.',','),
+      totalOther.toFixed(2).replace('.',','),
+      '',
+      ''
+    ]);
+
+    rows.push([]);
+    rows.push([
+      'PRODUTO',
+      'QUANTIDADE NO MÊS',
+      'FATURAMENTO DO PRODUTO',
+      ...data.days.map(d => reportDayLabel(d))
+    ]);
+
+    Object.values(data.products)
+      .sort((a,b) => b.revenue - a.revenue)
+      .forEach(product => {
+
+        rows.push([
+          product.name,
+          product.qty,
+          product.revenue.toFixed(2).replace('.',','),
+          ...data.days.map(day =>
+            product.days[day] || 0
+          )
+        ]);
+      });
+
+    const csv =
+      '\uFEFF' +
+      rows.map(row =>
+        row.map(csvEscape).join(';')
+      ).join('\r\n');
+
+    const blob = new Blob(
+      [csv],
+      {type:'text/csv;charset=utf-8'}
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+
+    a.href = url;
+    a.download =
+      'brazza-relatorio-' + month + '.csv';
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+  }
+
+  /* ---------------------------------------------------------
+     IMPRESSÃO
+     --------------------------------------------------------- */
+
+  function printMonthly(){
+
+    const month =
+      document.getElementById('repMonth').value;
+
+    if(!month) return;
+
+    const data = buildMonthlyReport(month);
+
+    const totalRevenue = data.orders.reduce(
+      (sum,o) => sum + (Number(o.total)||0),
+      0
+    );
+
+    let html = `
+      <div style="font-family:Arial,sans-serif">
+
+        <h1 style="margin-bottom:4px">
+          Brazza Pizzaria
+        </h1>
+
+        <h2 style="margin-top:0">
+          Relatório mensal — ${reportMonthLabel(month)}
+        </h2>
+
+        <p>
+          <b>Faturamento:</b> ${reportMoney(totalRevenue)}
+          &nbsp; · &nbsp;
+          <b>Pedidos:</b> ${data.orders.length}
+          &nbsp; · &nbsp;
+          <b>Cancelados:</b> ${data.cancelled}
+        </p>
+
+        <h3>Faturamento e fechamentos por dia</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Pedidos</th>
+              <th>Faturamento</th>
+              <th>Dinheiro</th>
+              <th>Outros</th>
+              <th>Fechamento</th>
+              <th>Diferença</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    data.days.forEach(day => {
+
+      const d = data.daily[day];
+
+      html += `
+        <tr>
+          <td>${reportDayLabel(day)}</td>
+          <td>${d.orders}</td>
+          <td>${reportMoney(d.revenue)}</td>
+          <td>${reportMoney(d.cash)}</td>
+          <td>${reportMoney(d.other)}</td>
+          <td>${d.closing ? 'Fechado' : 'Não fechado'}</td>
+          <td>${reportClosingDiff(d.closing)}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:24px">
+          Produtos vendidos no mês
+        </h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Qtd. mês</th>
+              <th>Faturamento</th>
+              ${data.days.map(day =>
+                `<th>${reportDayLabel(day)}</th>`
+              ).join('')}
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    Object.values(data.products)
+      .sort((a,b) => b.revenue - a.revenue)
+      .forEach(product => {
+
+        html += `
+          <tr>
+            <td>${esc(product.name)}</td>
+            <td>${product.qty}</td>
+            <td>${reportMoney(product.revenue)}</td>
+
+            ${data.days.map(day => `
+              <td>${product.days[day] || 0}</td>
+            `).join('')}
+          </tr>
+        `;
+      });
+
+    html += `
+          </tbody>
+        </table>
+
+      </div>
+    `;
+
+    const printArea =
+      document.getElementById('monthlyPrintArea');
+
+    printArea.innerHTML = html;
+    printArea.hidden = false;
+
+    window.print();
+
+    setTimeout(() => {
+      printArea.hidden = true;
+    }, 1000);
+  }
+
+  /* ---------------------------------------------------------
+     NAVEGAÇÃO
+     --------------------------------------------------------- */
+
+  const originalShowTab = showTab;
+
+  showTab = function(name){
+
+    if(name !== 'relatorio'){
+      originalShowTab(name);
+      return;
+    }
+
+    document.querySelectorAll('.tab')
+      .forEach(t =>
+        t.setAttribute(
+          'aria-selected',
+          t.dataset.tab === name
+        )
+      );
+
+    [
+      'vender',
+      'pedidos',
+      'caixa',
+      'cardapio'
+    ].forEach(v => {
+      const el = document.getElementById('v-' + v);
+      if(el) el.hidden = true;
+    });
+
+    const report =
+      document.getElementById('v-relatorio');
+
+    if(report){
+      report.hidden = false;
+    }
+
+    const fab =
+      document.getElementById('fab');
+
+    if(fab){
+      fab.style.visibility = 'hidden';
+    }
+
+    renderMonthlyReport();
+  };
+
+  /* ---------------------------------------------------------
+     EVENTOS
+     --------------------------------------------------------- */
+
+  document.addEventListener('change', function(e){
+
+    if(e.target.id === 'repMonth'){
+      renderMonthlyReport();
+    }
+
+  });
+
+  document.addEventListener('click', function(e){
+
+    const button =
+      e.target.closest('[data-a]');
+
+    if(!button) return;
+
+    if(button.dataset.a === 'monthlyCsv'){
+      exportMonthlyCSV();
+    }
+
+    if(button.dataset.a === 'printMonthly'){
+      printMonthly();
+    }
+
+  });
+
+  /* ---------------------------------------------------------
+     MÊS ATUAL
+     --------------------------------------------------------- */
+
+  const monthInput =
+    document.getElementById('repMonth');
+
+  if(monthInput){
+    monthInput.value =
+      new Date().toISOString().slice(0,7);
+  }
+
+})();
+</script></body>
 </html>
