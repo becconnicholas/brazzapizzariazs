@@ -586,7 +586,7 @@ if(!sb){
 
   try {
     const { error } = await sb.from('orders').insert({
-      user_name: getSession() || '',
+    user_name: sessionStorage.getItem('brazza_logged_user') || '',
       customer: order.customer,
       phone: order.phone,
       adress: order.addr,
