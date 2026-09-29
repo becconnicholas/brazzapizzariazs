@@ -326,8 +326,26 @@ main{padding:16px 20px 90px;max-width:1500px;margin:0 auto}
 <div id="printArea"></div>
 <div class="toast" id="toast" hidden></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 'use strict';
+  const SUPABASE_URL = 'COLE_AQUI_SEU_PROJECT_URL';
+const SUPABASE_ANON_KEY = 'COLE_AQUI_SUA_PUBLISHABLE_KEY';
+
+const sb = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+  sb.from('orders')
+  .select('id')
+  .limit(1)
+  .then(({ data, error }) => {
+    if (error) {
+      console.error('Erro Supabase:', error);
+    } else {
+      console.log('Supabase conectado!', data);
+    }
+  });
 /* ---------- utilidades ---------- */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
