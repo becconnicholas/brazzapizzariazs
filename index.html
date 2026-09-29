@@ -605,12 +605,12 @@ sb.from('orders').insert({
   received: order.received,
   change_amount: order.change,
   status: order.status
-}).then(({ error }) => {
+.then(({ error }) => {
   if (error) {
     console.error('Erro ao salvar pedido no Supabase:', error);
-    toast('Pedido salvo localmente, mas não no banco.');
+    alert('ERRO SUPABASE:\n' + error.message + '\n\n' + error.details);
   } else {
-    console.log('Pedido salvo no Supabase!');
+    alert('PEDIDO SALVO NO SUPABASE!');
   }
 });
 const keepType = C.type;
