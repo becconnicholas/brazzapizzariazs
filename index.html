@@ -698,14 +698,14 @@ function printOrder(id){
 
   printArea.innerHTML = receiptHTML(o);
 
+  // Aguarda o navegador renderizar o recibo
   setTimeout(() => {
     window.print();
 
     setTimeout(() => {
       printArea.innerHTML = '';
     }, 1000);
-
-  }, 200);
+  }, 300);
 }
 
 /* ---------- pedidos ---------- */
@@ -3149,6 +3149,106 @@ renderGrid(); renderCart();
   @page {
     size: 58mm auto;
     margin: 0;
+  }
+}
+  /* IMPRESSÃO OASIS OIA-8387 - BOBINA 58MM */
+
+#printArea {
+  display: none;
+}
+
+@media print {
+
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
+
+  html,
+  body {
+    width: 58mm !important;
+    min-width: 58mm !important;
+    max-width: 58mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  body > * {
+    display: none !important;
+  }
+
+  #printArea {
+    display: block !important;
+    width: 58mm !important;
+    max-width: 58mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  #printArea .receipt {
+    display: block !important;
+    width: 58mm !important;
+    max-width: 58mm !important;
+    min-height: 0 !important;
+    height: auto !important;
+
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+    padding: 2mm !important;
+
+    font-family: Arial, sans-serif !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  #printArea .receipt h3 {
+    margin: 0 0 2mm 0 !important;
+    text-align: center !important;
+    font-size: 16px !important;
+  }
+
+  #printArea .receipt .c {
+    text-align: center !important;
+  }
+
+  #printArea .receipt hr {
+    border: 0 !important;
+    border-top: 1px dashed #000 !important;
+    margin: 2mm 0 !important;
+  }
+
+  #printArea .receipt .r {
+    display: flex !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    gap: 2mm !important;
+  }
+
+  #printArea .receipt .r span:first-child {
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  #printArea .receipt .r span:last-child {
+    white-space: nowrap !important;
+  }
+
+  #printArea .receipt .b {
+    font-weight: bold !important;
+  }
+
+  #printArea .receipt .ind {
+    padding-left: 3mm !important;
+    font-size: 9px !important;
   }
 }
 </style>
