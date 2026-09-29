@@ -647,12 +647,11 @@ enviarPedidoSupabase(order);
   renderCart();
   $('#cart').classList.remove('open');
 
-  // Mostra o recibo e imprime automaticamente
   showReceipt(order, true);
 
   setTimeout(() => {
     printOrder(order.id);
-  }, 300);
+  }, 500);
 }
 
 function typeLabel(o){ return o.type==='entrega' ? 'Entrega' : o.type==='mesa' ? 'Mesa '+o.mesa : 'Balcão'; }
@@ -698,18 +697,15 @@ function printOrder(id){
   const printArea = $('#printArea');
 
   printArea.innerHTML = receiptHTML(o);
-  printArea.classList.add('printing');
 
-  // Dá tempo para o navegador montar o conteúdo
   setTimeout(() => {
     window.print();
 
     setTimeout(() => {
-      printArea.classList.remove('printing');
       printArea.innerHTML = '';
     }, 1000);
 
-  }, 100);
+  }, 200);
 }
 
 /* ---------- pedidos ---------- */
