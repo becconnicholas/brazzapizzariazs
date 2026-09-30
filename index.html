@@ -661,81 +661,183 @@ async function carregarPedidosSupabase(){
   }
 }
 /* ---------- finalizar ---------- */
-  async function enviarPedidoSupabase(order){
-    
-if(!sb){
-  alert('SUPABASE NÃO ESTÁ CONECTADO');
-  return;
-}
+ async function enviarPedidoSupabase(order){
 
-  try {
-    const { error } = await sb.from('orders').insert({
-    user_name: sessionStorage.getItem('brazza_logged_user') || '',
-      customer: order.customer,
-      phone: order.phone,
-      adress: order.addr,
-      mesa: order.mesa,
-      items: order.items,
-      subtotal: order.subtotal,
-      discount: order.discount,
-      fee: order.fee,
-      total: order.total,
-      pay: order.pay,
-      received: order.received,
-      change_amount: order.change,
-      status: order.status
-    });
+  if(!sb){
+    alert('SUPABASE NÃO ESTÁ CONECTADO');
+    return false;
+  }
+
+  try{
+
+    const { data, error } = await sb
+      .from('orders')
+      .insert({
+        user_name: sessionStorage.getItem('brazza_logged_user') || '',
+        customer: order.customer,
+        phone: order.phone,
+        adress: order.addr,
+        mesa: order.mesa,
+        items: order.items,
+        subtotal: order.subtotal,
+        discount: order.discount,
+        fee: order.fee,
+        total: order.total,
+        pay: order.pay,
+        received: order.received,
+        change_amount: order.change,
+        status: order.status
+      })
+      .select('id')
+      .single();
 
     if(error){
+
       console.error('Erro Supabase:', error);
-      alert('ERRO AO SALVAR NO SUPABASE:\n' + error.message);
+
+      alert(
+        'ERRO AO SALVAR NO SUPABASE:\n' +
+        error.message
+      );
+
       return false;
     }
 
-    console.log('PEDIDO SALVO NO SUPABASE!');
+    if(!data || !data.id){
+
+      alert(
+        'ERRO: o Supabase salvou o pedido, mas não retornou o ID.'
+      );
+
+      return false;
+    }
+
+    order.id = data.id;
+
+    save();
+
+    console.log(
+      'PEDIDO SALVO NO SUPABASE! ID:',
+      data.id
+    );
+
     return true;
 
   }catch(e){
+
     console.error('Erro Supabase:', e);
-    alert('ERRO AO CONECTAR AO SUPABASE:\n' + e.message);
+
+    alert(
+      'ERRO AO CONECTAR AO SUPABASE:\n' +
+      e.message
+    );
+
     return false;
   }
 }
-function finish(){
+async function finish(){
+
   if(!C.items.length) return;
+
   const t = calc();
-  if(C.type==='entrega' && !C.addr.trim()){ toast('Informe o endereço de entrega.'); $('#fAddr').focus(); return; }
-  if(C.type==='mesa' && !C.mesa.trim()){ toast('Informe o número da mesa.'); $('#fMesa').focus(); return; }
+
+  if(
+    C.type === 'entrega' &&
+    !C.addr.trim()
+  ){
+    toast('Informe o endereço de entrega.');
+    $('#fAddr').focus();
+    return;
+  }
+
+  if(
+    C.type === 'mesa' &&
+    !C.mesa.trim()
+  ){
+    toast('Informe o número da mesa.');
+    $('#fMesa').focus();
+    return;
+  }
+
   const recv = num(C.recv);
-  if(C.pay==='Dinheiro' && recv>0 && recv < t.total){ toast('O valor recebido é menor que o total.'); $('#fRecv').focus(); return; }
+
+  if(
+    C.pay === 'Dinheiro' &&
+    recv > 0 &&
+    recv < t.total
+  ){
+    toast('O valor recebido é menor que o total.');
+    $('#fRecv').focus();
+    return;
+  }
 
   const today = dayKey(Date.now());
-  if(S.counterDay !== today){ S.counterDay = today; S.counter = 0; }
+
+  if(S.counterDay !== today){
+    S.counterDay = today;
+    S.counter = 0;
+  }
+
   S.counter++;
+
   const order = {
-    id: uid(), num: S.counter, ts: Date.now(), type: C.type,
-    customer: C.name.trim(), phone: C.phone.trim(), addr: C.addr.trim(), mesa: C.mesa.trim(),
-    items: C.items.map(i => ({name:i.name, detail:i.detail, unit:i.unit, qty:i.qty})),
-    subtotal: t.sub, discount: t.d, fee: t.fee, total: t.total,
+    id: uid(),
+    num: S.counter,
+    ts: Date.now(),
+    type: C.type,
+
+    customer: C.name.trim(),
+    phone: C.phone.trim(),
+    addr: C.addr.trim(),
+    mesa: C.mesa.trim(),
+
+    items: C.items.map(i => ({
+      name: i.name,
+      detail: i.detail,
+      unit: i.unit,
+      qty: i.qty
+    })),
+
+    subtotal: t.sub,
+    discount: t.d,
+    fee: t.fee,
+    total: t.total,
+
     pay: 'Pendente',
     received: 0,
     change: 0,
     status: 'novo'
-    };
-S.orders.push(order);
-save();
-  
+  };
+
+  S.orders.push(order);
+  save();
+
+  const salvo = await enviarPedidoSupabase(order);
+
+  if(!salvo){
+
+    S.orders = S.orders.filter(
+      x => x.id !== order.id
+    );
+
+    save();
+
+    return;
+  }
+
   const keepType = C.type;
+
   C = newCart(keepType);
+
   resetForm();
   renderCart();
+
   $('#cart').classList.remove('open');
 
-setTimeout(() => {
-  printKitchenOrder(order.id);
-}, 500);
+  setTimeout(() => {
+    printKitchenOrder(order.id);
+  }, 500);
 }
-
 function typeLabel(o){ return o.type==='entrega' ? 'Entrega' : o.type==='mesa' ? 'Mesa '+o.mesa : 'Balcão'; }
 function receiptHTML(o){
   const d = new Date(o.ts);
@@ -921,8 +1023,12 @@ function renderPagamento(o){
     </div>
   `;
 }
-  async function confirmarPagamento(){
-  const o = S.orders.find(x => x.id === pagamentoAtual.orderId);
+ async function confirmarPagamento(){
+
+  const o = S.orders.find(
+    x => String(x.id) === String(pagamentoAtual.orderId)
+  );
+
   if(!o) return;
 
   const recv = num(pagamentoAtual.recv);
@@ -944,19 +1050,44 @@ function renderPagamento(o){
       : 0;
 
   o.change =
-    pagamentoAtual.pay === 'Dinheiro' && recv > o.total
+    pagamentoAtual.pay === 'Dinheiro' &&
+    recv > o.total
       ? Math.round((recv - o.total) * 100) / 100
       : 0;
 
   save();
 
-  await enviarPedidoSupabase(o);
+  if(sb){
+
+    const { error } = await sb
+      .from('orders')
+      .update({
+        pay: o.pay,
+        received: o.received,
+        change_amount: o.change
+      })
+      .eq('id', o.id);
+
+    if(error){
+
+      console.error(
+        'Erro ao atualizar pagamento no Supabase:',
+        error
+      );
+
+      toast(
+        'Pagamento salvo localmente, mas não foi atualizado no Supabase.'
+      );
+
+      return;
+    }
+
+  }
 
   closeModal();
 
   showReceipt(o, true);
 }
-  
 /* ---------- pedidos ---------- */
 function renderOrders(){
   const k = $('#ordDate').value;
