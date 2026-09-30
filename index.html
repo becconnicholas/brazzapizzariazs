@@ -1221,7 +1221,61 @@ case 'confirmarPagamento':
   break;
     case 'view': { const o=S.orders.find(x=>x.id===id); if(o) showReceipt(o,false); break; }
     case 'advance': { const o=S.orders.find(x=>x.id===id); const i=STATUS.indexOf(o.status); if(i>=0 && i<STATUS.length-1){ o.status=STATUS[i+1]; save(); renderOrders(); } break; }
-    case 'cancel': { if(!confirm('Cancelar este pedido? Ele deixa de contar no caixa.')) break; const o=S.orders.find(x=>x.id===id); o.status='cancelado'; save(); renderOrders(); break; }
+    case 'cancel': {
+  if(!confirm('Cancelar este pedido? Ele deixa de contar no caixa.')) break;
+
+  const o = S.orders.find(x => x.id === id);
+  if(!o) break;
+
+  o.status = 'cancelado';
+
+  save();
+  renderOrders();
+
+  if(sb){
+
+    sb
+      .from('orders')
+      .update({
+        status: 'cancelado'
+      })
+      .eq('id', o.id)
+      .then(({ error }) => {
+
+        if(error){
+          console.error(
+            'Erro ao cancelar pedido no Supabase:',
+            error
+          );
+
+          toast(
+            'Pedido cancelado localmente, mas não foi atualizado no Supabase.'
+          );
+
+          return;
+        }
+
+        toast('Pedido cancelado com sucesso.');
+
+      })
+      .catch(e => {
+
+        console.error('Erro Supabase:', e);
+
+        toast(
+          'Pedido cancelado localmente, mas houve erro no Supabase.'
+        );
+
+      });
+
+  }else{
+
+    toast('Pedido cancelado.');
+
+  }
+
+  break;
+}
     case 'csv': exportCSV(); break;
    case 'closeCaixa': {
   const k = $('#cxDate').value;
