@@ -948,6 +948,32 @@ function closingPanel(k, os){
   return `<div class="closing">
     <div class="closing-head"><h3>Fechamento de caixa</h3><span class="meta" style="color:var(--muted)">ainda não fechado</span></div>
     <div class="closing-grid">
+  <div class="field">
+    <label>Pedidos</label>
+    <input value="${os.length}" disabled>
+  </div>
+
+  <div class="field">
+    <label>Total vendido</label>
+    <input value="${money(os.reduce((s,o)=>s+o.total,0))}" disabled>
+  </div>
+
+  <div class="field">
+    <label>Dinheiro</label>
+    <input value="${money(os.filter(o=>o.pay==='Dinheiro').reduce((s,o)=>s+o.total,0))}" disabled>
+  </div>
+
+  <div class="field">
+    <label>PIX</label>
+    <input value="${money(os.filter(o=>o.pay==='PIX').reduce((s,o)=>s+o.total,0))}" disabled>
+  </div>
+
+  <div class="field">
+    <label>Cartão</label>
+    <input value="${money(os.filter(o=>o.pay==='Cartão').reduce((s,o)=>s+o.total,0))}" disabled>
+  </div>
+</div>
+    <div class="closing-grid">
       <div class="field"><label for="clOpening">Fundo de caixa (abertura)</label><input id="clOpening" inputmode="decimal" placeholder="0,00" value="${c.opening?String(c.opening).replace('.',','):''}"></div>
       <div class="field"><label>Vendas em dinheiro</label><input value="${money(c.cashSales)}" disabled></div>
       <div class="field"><label>Esperado em caixa</label><input id="clExpected" value="${money(c.expected)}" disabled></div>
