@@ -1223,7 +1223,7 @@ case 'confirmarPagamento':
     case 'advance': { const o=S.orders.find(x=>x.id===id); const i=STATUS.indexOf(o.status); if(i>=0 && i<STATUS.length-1){ o.status=STATUS[i+1]; save(); renderOrders(); } break; }
     case 'cancel': { if(!confirm('Cancelar este pedido? Ele deixa de contar no caixa.')) break; const o=S.orders.find(x=>x.id===id); o.status='cancelado'; save(); renderOrders(); break; }
     case 'csv': exportCSV(); break;
-    case 'closeCaixa': {
+   case 'closeCaixa': {
   const k = $('#cxDate').value;
   const opening = num($('#clOpening').value);
   const counted = num($('#clCounted').value);
@@ -1269,35 +1269,52 @@ case 'confirmarPagamento':
   renderCaixa();
 
   if(sb){
-    try{
-      const { error } = await sb
-        .from('cash_closings')
-        .insert({
-          closing_date: k,
-          opening: opening,
-          counted: counted,
-          cash_sales: cashSales,
-          pix_sales: pixSales,
-          card_sales: cardSales,
-          total_sales: totalSales,
-          orders_count: os.length,
-          expected: expected,
-          difference: diff
-        });
 
-      if(error){
-        console.error('Erro ao salvar fechamento no Supabase:', error);
-        toast('Caixa fechado localmente, mas não foi salvo no Supabase.');
-        break;
-      }
+    sb
+      .from('cash_closings')
+      .insert({
+        closing_date: k,
+        opening: opening,
+        counted: counted,
+        cash_sales: cashSales,
+        pix_sales: pixSales,
+        card_sales: cardSales,
+        total_sales: totalSales,
+        orders_count: os.length,
+        expected: expected,
+        difference: diff
+      })
+      .then(({ error }) => {
 
-      toast('Caixa fechado e salvo no Supabase.');
-    }catch(e){
-      console.error('Erro Supabase:', e);
-      toast('Caixa fechado localmente, mas houve erro no Supabase.');
-    }
+        if(error){
+          console.error(
+            'Erro ao salvar fechamento no Supabase:',
+            error
+          );
+
+          toast(
+            'Caixa fechado localmente, mas não foi salvo no Supabase.'
+          );
+
+          return;
+        }
+
+        toast('Caixa fechado e salvo no Supabase.');
+      })
+      .catch(e => {
+
+        console.error('Erro Supabase:', e);
+
+        toast(
+          'Caixa fechado localmente, mas houve erro no Supabase.'
+        );
+
+      });
+
   }else{
+
     toast('Caixa fechado.');
+
   }
 
   break;
