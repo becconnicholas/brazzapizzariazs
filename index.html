@@ -792,7 +792,7 @@ function renderPagamento(o){
             class="btn alt"
             data-a="pagamentoForma"
             data-v="${p}"
-            style="${pagamentoAtual.pay===p ? 'outline:2px solid var(--accent)' : ''}"
+           style="${pagamentoAtual.pay===p ? 'outline:2px solid var(--green)' : ''}"
           >
             ${p}
           </button>
@@ -1137,7 +1137,20 @@ document.addEventListener('input', e => {
     x => x.id === pagamentoAtual.orderId
   );
 
-  if(o) renderPagamento(o);
+  if(!o) return;
+
+  const recv = num(pagamentoAtual.recv);
+  const troco = $('#pagamentoTroco');
+
+  if(!troco) return;
+
+  if(recv >= o.total){
+    troco.textContent = 'Troco: ' + money(recv - o.total);
+  }else if(recv > 0){
+    troco.textContent = 'Faltam ' + money(o.total - recv);
+  }else{
+    troco.textContent = '';
+  }
 
   return;
 }
