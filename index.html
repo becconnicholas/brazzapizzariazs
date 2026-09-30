@@ -574,7 +574,7 @@ function resetForm(){
 /* ---------- carregar pedidos do supabase ---------- */
 async function carregarPedidosSupabase(){
   if(!sb){
-    console.warn('Supabase não conectado.');
+    alert('ERRO: Supabase não está conectado.');
     return;
   }
 
@@ -585,17 +585,28 @@ async function carregarPedidosSupabase(){
       .order('created_at', { ascending: true });
 
     if(error){
-      console.error('Erro ao carregar pedidos do Supabase:', error);
+      alert(
+        'ERRO AO CARREGAR PEDIDOS DO SUPABASE:\n\n' +
+        error.message
+      );
       return;
     }
 
-    if(!Array.isArray(data)) return;
+    if(!Array.isArray(data)){
+      alert('Supabase não retornou uma lista de pedidos.');
+      return;
+    }
 
     S.orders = data.map(row => ({
       id: row.id || uid(),
       num: row.num || 0,
-      ts: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
-      type: row.mesa ? 'mesa' : (row.adress ? 'entrega' : 'balcao'),
+      ts: row.created_at
+        ? new Date(row.created_at).getTime()
+        : Date.now(),
+
+      type: row.mesa
+        ? 'mesa'
+        : (row.adress ? 'entrega' : 'balcao'),
 
       customer: row.customer || '',
       phone: row.phone || '',
@@ -618,14 +629,21 @@ async function carregarPedidosSupabase(){
 
     save();
 
-    console.log('PEDIDOS CARREGADOS DO SUPABASE:', S.orders.length);
+    alert(
+      'PEDIDOS CARREGADOS DO SUPABASE!\n\n' +
+      'Quantidade encontrada: ' +
+      S.orders.length
+    );
 
     if(typeof render === 'function'){
       render();
     }
 
   }catch(e){
-    console.error('Erro ao carregar pedidos:', e);
+    alert(
+      'ERRO AO CARREGAR PEDIDOS:\n\n' +
+      e.message
+    );
   }
 }
 /* ---------- finalizar ---------- */
