@@ -1224,30 +1224,84 @@ case 'confirmarPagamento':
     case 'cancel': { if(!confirm('Cancelar este pedido? Ele deixa de contar no caixa.')) break; const o=S.orders.find(x=>x.id===id); o.status='cancelado'; save(); renderOrders(); break; }
     case 'csv': exportCSV(); break;
     case 'closeCaixa': {
-      const k = $('#cxDate').value;
-      const opening = num($('#clOpening').value), counted = num($('#clCounted').value);
-      if(!$('#clCounted').value.trim()){ toast('Informe o valor contado no caixa.'); $('#clCounted').focus(); break; }
-      const os = dayOrders(k);
-      const cashSales = os.filter(o=>o.pay==='Dinheiro').reduce((s,o)=>s+o.total,0);
-      const expected = opening + cashSales, diff = counted - expected;
-      const totalSales = os.reduce((s,o)=>s+o.total,0);
-const pixSales = os.filter(o=>o.pay==='PIX').reduce((s,o)=>s+o.total,0);
-const cardSales = os.filter(o=>o.pay==='Cartão').reduce((s,o)=>s+o.total,0);
+  const k = $('#cxDate').value;
+  const opening = num($('#clOpening').value);
+  const counted = num($('#clCounted').value);
 
-S.closings[k] = {
-  opening,
-  counted,
-  cashSales,
-  pixSales,
-  cardSales,
-  totalSales,
-  ordersCount: os.length,
-  expected,
-  diff,
-  ts: Date.now()
-};
-      save(); renderCaixa(); toast('Caixa fechado.'); break;
+  if(!$('#clCounted').value.trim()){
+    toast('Informe o valor contado no caixa.');
+    $('#clCounted').focus();
+    break;
+  }
+
+  const os = dayOrders(k);
+
+  const cashSales = os
+    .filter(o => o.pay === 'Dinheiro')
+    .reduce((s,o) => s + o.total, 0);
+
+  const pixSales = os
+    .filter(o => o.pay === 'PIX')
+    .reduce((s,o) => s + o.total, 0);
+
+  const cardSales = os
+    .filter(o => o.pay === 'Cartão')
+    .reduce((s,o) => s + o.total, 0);
+
+  const expected = opening + cashSales;
+  const diff = counted - expected;
+  const totalSales = os.reduce((s,o) => s + o.total, 0);
+
+  S.closings[k] = {
+    opening,
+    counted,
+    cashSales,
+    pixSales,
+    cardSales,
+    totalSales,
+    ordersCount: os.length,
+    expected,
+    diff,
+    ts: Date.now()
+  };
+
+  save();
+  renderCaixa();
+
+  if(sb){
+    try{
+      const { error } = await sb
+        .from('cash_closings')
+        .insert({
+          closing_date: k,
+          opening: opening,
+          counted: counted,
+          cash_sales: cashSales,
+          pix_sales: pixSales,
+          card_sales: cardSales,
+          total_sales: totalSales,
+          orders_count: os.length,
+          expected: expected,
+          difference: diff
+        });
+
+      if(error){
+        console.error('Erro ao salvar fechamento no Supabase:', error);
+        toast('Caixa fechado localmente, mas não foi salvo no Supabase.');
+        break;
+      }
+
+      toast('Caixa fechado e salvo no Supabase.');
+    }catch(e){
+      console.error('Erro Supabase:', e);
+      toast('Caixa fechado localmente, mas houve erro no Supabase.');
     }
+  }else{
+    toast('Caixa fechado.');
+  }
+
+  break;
+}
     case 'reopenCaixa': { const k=$('#cxDate').value; if(confirm('Reabrir o fechamento deste dia para correção?')){ delete S.closings[k]; save(); renderCaixa(); } break; }
     case 'printClosing': { const k=$('#cxDate').value; $('#printArea').innerHTML = receiptClosingHTML(k); window.print(); break; }
     /* modal pizza */
