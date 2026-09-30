@@ -570,7 +570,63 @@ function resetForm(){
   ['fName','fPhone','fAddr','fMesa','fDisc','fRecv'].forEach(id => $('#'+id).value='');
   $('#fDiscType').value = 'R';
 }
+/* ---------- carregar pedidos do supabase ---------- */
+async function carregarPedidosSupabase(){
+  if(!sb){
+    console.warn('Supabase não conectado.');
+    return;
+  }
 
+  try {
+    const { data, error } = await sb
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if(error){
+      console.error('Erro ao carregar pedidos do Supabase:', error);
+      return;
+    }
+
+    if(!Array.isArray(data)) return;
+
+    S.orders = data.map(row => ({
+      id: row.id || uid(),
+      num: row.num || 0,
+      ts: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
+      type: row.mesa ? 'mesa' : (row.adress ? 'entrega' : 'balcao'),
+
+      customer: row.customer || '',
+      phone: row.phone || '',
+      addr: row.adress || '',
+      mesa: row.mesa || '',
+
+      items: Array.isArray(row.items) ? row.items : [],
+
+      subtotal: num(row.subtotal),
+      discount: num(row.discount),
+      fee: num(row.fee),
+      total: num(row.total),
+
+      pay: row.pay || 'Pendente',
+      received: num(row.received),
+      change: num(row.change_amount),
+
+      status: row.status || 'novo'
+    }));
+
+    save();
+
+    console.log('PEDIDOS CARREGADOS DO SUPABASE:', S.orders.length);
+
+    if(typeof render === 'function'){
+      render();
+    }
+
+  }catch(e){
+    console.error('Erro ao carregar pedidos:', e);
+  }
+}
 /* ---------- finalizar ---------- */
   async function enviarPedidoSupabase(order){
     
@@ -937,11 +993,46 @@ function closingPanel(k, os){
         <button class="btn alt sm" data-a="reopenCaixa">Reabrir</button>
         <button class="btn alt sm" data-a="printClosing">Imprimir</button></div>
       <div class="closing-grid">
-        <div class="stat"><small>Fundo de caixa</small><b style="font-size:20px">${money(s.opening)}</b></div>
-        <div class="stat"><small>Vendas em dinheiro</small><b style="font-size:20px">${money(s.cashSales)}</b></div>
-        <div class="stat"><small>Esperado em caixa</small><b style="font-size:20px">${money(s.expected)}</b></div>
-        <div class="stat"><small>Contado no caixa</small><b style="font-size:20px">${money(s.counted)}</b></div>
-      </div>
+  <div class="stat">
+    <small>Pedidos</small>
+    <b style="font-size:20px">${s.ordersCount ?? os.length}</b>
+  </div>
+
+  <div class="stat">
+    <small>Total vendido</small>
+    <b style="font-size:20px">${money(s.totalSales ?? os.reduce((t,o)=>t+o.total,0))}</b>
+  </div>
+
+  <div class="stat">
+    <small>Dinheiro</small>
+    <b style="font-size:20px">${money(s.cashSales)}</b>
+  </div>
+
+  <div class="stat">
+    <small>PIX</small>
+    <b style="font-size:20px">${money(s.pixSales ?? 0)}</b>
+  </div>
+
+  <div class="stat">
+    <small>Cartão</small>
+    <b style="font-size:20px">${money(s.cardSales ?? 0)}</b>
+  </div>
+
+  <div class="stat">
+    <small>Fundo de caixa</small>
+    <b style="font-size:20px">${money(s.opening)}</b>
+  </div>
+
+  <div class="stat">
+    <small>Esperado em caixa</small>
+    <b style="font-size:20px">${money(s.expected)}</b>
+  </div>
+
+  <div class="stat">
+    <small>Contado no caixa</small>
+    <b style="font-size:20px">${money(s.counted)}</b>
+  </div>
+</div>
       <div class="diff ${s.diff>0?'pos':s.diff<0?'neg':'zero'}" style="font-size:22px">${s.diff===0?'Caixa bateu certinho':(s.diff>0?'Sobra de ':'Falta de ')+money(Math.abs(s.diff))}</div>
     </div>`;
   }
