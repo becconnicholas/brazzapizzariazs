@@ -347,7 +347,21 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = n => (Number(n) || 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
 const uid = () => Math.random().toString(36).slice(2, 9);
-const num = v => { const n = parseFloat(String(v).replace(/\./g,'').replace(',', '.')); return isNaN(n) ? 0 : n; };
+const num = v => {
+  if (typeof v === 'number') return isNaN(v) ? 0 : v;
+
+  const s = String(v ?? '').trim();
+
+  if (!s) return 0;
+
+  const normalized = s.includes(',')
+    ? s.replace(/\./g, '').replace(',', '.')
+    : s;
+
+  const n = parseFloat(normalized);
+
+  return isNaN(n) ? 0 : n;
+};
 const pad = n => String(n).padStart(2, '0');
 const dayKey = ts => { const d = new Date(ts); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
 const timeStr = ts => { const d = new Date(ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
