@@ -1060,12 +1060,12 @@ document.addEventListener('click', e => {
 case 'closeModal': closeModal(); break;
 case 'print': printOrder(id); break;
 
-case 'pagamentoForma':
+case 'pagamentoForma': {
   pagamentoAtual.pay = v;
   const op = S.orders.find(x => x.id === pagamentoAtual.orderId);
   if(op) renderPagamento(op);
   break;
-
+}
 case 'confirmarPagamento':
   confirmarPagamento();
   break;
