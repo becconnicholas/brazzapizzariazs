@@ -1353,9 +1353,15 @@ case 'confirmarPagamento':
     case 'view': { const o=S.orders.find(x=>x.id===id); if(o) showReceipt(o,false); break; }
     case 'advance': { const o=S.orders.find(x=>x.id===id); const i=STATUS.indexOf(o.status); if(i>=0 && i<STATUS.length-1){ o.status=STATUS[i+1]; save(); renderOrders(); } break; }
     case 'cancel': {
-  if(!confirm('Cancelar este pedido? Ele deixa de contar no caixa.')) break;
 
-  const o = S.orders.find(x => x.id === id);
+  if(!confirm('Cancelar este pedido? Ele deixa de contar no caixa.')){
+    break;
+  }
+
+  const o = S.orders.find(
+    x => String(x.id) === String(id)
+  );
+
   if(!o) break;
 
   o.status = 'cancelado';
@@ -1374,6 +1380,7 @@ case 'confirmarPagamento':
       .then(({ error }) => {
 
         if(error){
+
           console.error(
             'Erro ao cancelar pedido no Supabase:',
             error
@@ -1391,7 +1398,10 @@ case 'confirmarPagamento':
       })
       .catch(e => {
 
-        console.error('Erro Supabase:', e);
+        console.error(
+          'Erro Supabase:',
+          e
+        );
 
         toast(
           'Pedido cancelado localmente, mas houve erro no Supabase.'
