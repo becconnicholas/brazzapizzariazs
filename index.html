@@ -1383,7 +1383,10 @@ document.addEventListener('keydown', e => { if(e.key==='Escape' && !$('#modal').
 function tick(){ const d=new Date(); $('#clock').textContent = d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}) + ' · ' + timeStr(d); }
 tick(); setInterval(tick, 30000);
 $('#ordDate').value = $('#cxDate').value = dayKey(Date.now());
-renderGrid(); renderCart();
+tick(); setInterval(tick, 30000);
+$('#ordDate').value = $('#cxDate').value = dayKey(Date.now());
+renderGrid();
+</script>
 </script>
 <!-- =========================================================
      RELATÓRIO MENSAL - BRAZZA PIZZARIA
