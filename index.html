@@ -643,13 +643,7 @@ async function carregarPedidosSupabase(){
 
     save();
 
-    alert(
-      'PEDIDOS CARREGADOS DO SUPABASE!\n\n' +
-      'Quantidade encontrada: ' +
-      S.orders.length
-    );
-
-    if(typeof render === 'function'){
+      if(typeof render === 'function'){
       render();
     }
 
