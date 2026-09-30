@@ -1106,7 +1106,22 @@ case 'confirmarPagamento':
       const os = dayOrders(k);
       const cashSales = os.filter(o=>o.pay==='Dinheiro').reduce((s,o)=>s+o.total,0);
       const expected = opening + cashSales, diff = counted - expected;
-      S.closings[k] = {opening, counted, cashSales, expected, diff, ts: Date.now()};
+      const totalSales = os.reduce((s,o)=>s+o.total,0);
+const pixSales = os.filter(o=>o.pay==='PIX').reduce((s,o)=>s+o.total,0);
+const cardSales = os.filter(o=>o.pay==='Cartão').reduce((s,o)=>s+o.total,0);
+
+S.closings[k] = {
+  opening,
+  counted,
+  cashSales,
+  pixSales,
+  cardSales,
+  totalSales,
+  ordersCount: os.length,
+  expected,
+  diff,
+  ts: Date.now()
+};
       save(); renderCaixa(); toast('Caixa fechado.'); break;
     }
     case 'reopenCaixa': { const k=$('#cxDate').value; if(confirm('Reabrir o fechamento deste dia para correção?')){ delete S.closings[k]; save(); renderCaixa(); } break; }
