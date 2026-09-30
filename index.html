@@ -628,14 +628,13 @@ function finish(){
     customer: C.name.trim(), phone: C.phone.trim(), addr: C.addr.trim(), mesa: C.mesa.trim(),
     items: C.items.map(i => ({name:i.name, detail:i.detail, unit:i.unit, qty:i.qty})),
     subtotal: t.sub, discount: t.d, fee: t.fee, total: t.total,
-    pay: C.pay, received: C.pay==='Dinheiro' && recv>0 ? recv : 0,
-    change: C.pay==='Dinheiro' && recv>t.total ? Math.round((recv-t.total)*100)/100 : 0,
+    pay: 'Pendente',
+    received: 0,
+    change: 0,
     status: 'novo'
-  };
+    };
 S.orders.push(order);
 save();
-enviarPedidoSupabase(order);
-
   
   const keepType = C.type;
   C = newCart(keepType);
@@ -643,11 +642,9 @@ enviarPedidoSupabase(order);
   renderCart();
   $('#cart').classList.remove('open');
 
-  showReceipt(order, true);
-
-  setTimeout(() => {
-    printOrder(order.id);
-  }, 500);
+setTimeout(() => {
+  printKitchenOrder(order.id);
+}, 500);
 }
 
 function typeLabel(o){ return o.type==='entrega' ? 'Entrega' : o.type==='mesa' ? 'Mesa '+o.mesa : 'Balcão'; }
@@ -703,6 +700,174 @@ function printOrder(id){
 
   }, 200);
 }
+function printKitchenOrder(id){
+  const o = S.orders.find(x => x.id === id);
+  if(!o) return;
+
+  const printArea = $('#printArea');
+
+  printArea.innerHTML = `
+    <div class="receipt">
+      <h3>BRAZZA PIZZARIA</h3>
+      <div class="c">COMANDA #${o.num}</div>
+      <div class="c">${typeLabel(o)}</div>
+      <hr>
+
+      ${o.customer ? `<div><b>Cliente:</b> ${esc(o.customer)}</div>` : ''}
+      ${o.phone ? `<div><b>Fone:</b> ${esc(o.phone)}</div>` : ''}
+      ${o.addr ? `<div><b>Endereço:</b> ${esc(o.addr)}</div>` : ''}
+      ${o.mesa ? `<div><b>Mesa:</b> ${esc(o.mesa)}</div>` : ''}
+
+      <hr>
+
+      ${o.items.map(i => `
+        <div class="r">
+          <span>${i.qty}x ${esc(i.name)}</span>
+          <span>${money(i.unit * i.qty)}</span>
+        </div>
+        ${i.detail ? `<div>${esc(i.detail)}</div>` : ''}
+      `).join('')}
+
+      <hr>
+
+      <div class="r b">
+        <span>TOTAL</span>
+        <span>${money(o.total)}</span>
+      </div>
+
+      <hr>
+      <div class="c"><b>COMANDA - COZINHA</b></div>
+    </div>
+  `;
+
+  setTimeout(() => {
+    window.print();
+
+    setTimeout(() => {
+      printArea.innerHTML = '';
+      abrirPagamento(o.id);
+    }, 500);
+
+  }, 200);
+}
+  let pagamentoAtual = {
+  orderId: null,
+  pay: 'Dinheiro',
+  recv: ''
+};
+
+function abrirPagamento(id){
+  const o = S.orders.find(x => x.id === id);
+  if(!o) return;
+
+  pagamentoAtual = {
+    orderId: id,
+    pay: 'Dinheiro',
+    recv: ''
+  };
+
+  renderPagamento(o);
+  openModal();
+}
+
+function renderPagamento(o){
+  const recv = num(pagamentoAtual.recv);
+
+  $('#sheet').innerHTML = `
+    <h2>Finalizar pagamento</h2>
+
+    <div style="background:var(--bg);padding:14px;border-radius:12px;margin-bottom:14px">
+      <div><b>Pedido #${o.num}</b></div>
+      <div style="font-size:22px;font-weight:800;margin-top:5px">
+        Total: ${money(o.total)}
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Forma de pagamento</label>
+
+      <div class="seg" style="margin-top:8px">
+        ${['Dinheiro','PIX','Cartão'].map(p => `
+          <button
+            class="btn alt"
+            data-a="pagamentoForma"
+            data-v="${p}"
+            style="${pagamentoAtual.pay===p ? 'outline:2px solid var(--accent)' : ''}"
+          >
+            ${p}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+
+    <div id="pagamentoDinheiro" ${pagamentoAtual.pay!=='Dinheiro' ? 'hidden' : ''}>
+      <div class="field">
+        <label>Valor recebido</label>
+        <input
+          id="pagamentoRecebido"
+          type="number"
+          inputmode="decimal"
+          step="0.01"
+          min="0"
+          placeholder="0,00"
+          value="${pagamentoAtual.recv}"
+        >
+      </div>
+
+      <div id="pagamentoTroco" style="margin-top:8px;font-weight:700">
+        ${
+          recv >= o.total
+            ? `Troco: ${money(recv-o.total)}`
+            : recv > 0
+              ? `Faltam ${money(o.total-recv)}`
+              : ''
+        }
+      </div>
+    </div>
+
+    <div class="sheet-foot">
+      <button class="btn" data-a="confirmarPagamento">
+        Confirmar pagamento
+      </button>
+    </div>
+  `;
+}
+  async function confirmarPagamento(){
+  const o = S.orders.find(x => x.id === pagamentoAtual.orderId);
+  if(!o) return;
+
+  const recv = num(pagamentoAtual.recv);
+
+  if(
+    pagamentoAtual.pay === 'Dinheiro' &&
+    recv < o.total
+  ){
+    toast('O valor recebido é menor que o total.');
+    $('#pagamentoRecebido').focus();
+    return;
+  }
+
+  o.pay = pagamentoAtual.pay;
+
+  o.received =
+    pagamentoAtual.pay === 'Dinheiro'
+      ? recv
+      : 0;
+
+  o.change =
+    pagamentoAtual.pay === 'Dinheiro' && recv > o.total
+      ? Math.round((recv - o.total) * 100) / 100
+      : 0;
+
+  save();
+
+  await enviarPedidoSupabase(o);
+
+  closeModal();
+
+  showReceipt(o, true);
+}
+  
 /* ---------- pedidos ---------- */
 function renderOrders(){
   const k = $('#ordDate').value;
@@ -892,8 +1057,18 @@ document.addEventListener('click', e => {
     case 'openCart': $('#cart').classList.add('open'); break;
     case 'closeCart': $('#cart').classList.remove('open'); break;
     case 'finish': finish(); break;
-    case 'closeModal': closeModal(); break;
-    case 'print': printOrder(id); break;
+case 'closeModal': closeModal(); break;
+case 'print': printOrder(id); break;
+
+case 'pagamentoForma':
+  pagamentoAtual.pay = v;
+  const op = S.orders.find(x => x.id === pagamentoAtual.orderId);
+  if(op) renderPagamento(op);
+  break;
+
+case 'confirmarPagamento':
+  confirmarPagamento();
+  break;
     case 'view': { const o=S.orders.find(x=>x.id===id); if(o) showReceipt(o,false); break; }
     case 'advance': { const o=S.orders.find(x=>x.id===id); const i=STATUS.indexOf(o.status); if(i>=0 && i<STATUS.length-1){ o.status=STATUS[i+1]; save(); renderOrders(); } break; }
     case 'cancel': { if(!confirm('Cancelar este pedido? Ele deixa de contar no caixa.')) break; const o=S.orders.find(x=>x.id===id); o.status='cancelado'; save(); renderOrders(); break; }
@@ -955,6 +1130,17 @@ document.addEventListener('input', e => {
   const map = {fName:'name', fPhone:'phone', fAddr:'addr', fMesa:'mesa', fRecv:'recv'};
   if(map[id]){ C[map[id]] = e.target.value; if(id==='fRecv') renderCart(); return; }
   if(id==='fDisc'){ C.discVal = Math.max(0, num(e.target.value)); renderCart(); return; }
+  if(id === 'pagamentoRecebido'){
+  pagamentoAtual.recv = e.target.value;
+
+  const o = S.orders.find(
+    x => x.id === pagamentoAtual.orderId
+  );
+
+  if(o) renderPagamento(o);
+
+  return;
+}
   if(id==='fDiscType'){ C.discType = e.target.value; renderCart(); return; }
   if(id==='search'){ renderGrid(); }
   if(id==='clOpening' || id==='clCounted'){ updateClosingCalc($('#cxDate').value, dayOrders($('#cxDate').value)); }
