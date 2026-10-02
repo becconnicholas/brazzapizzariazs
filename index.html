@@ -1135,7 +1135,7 @@ function renderPagamento(o){
     </div>
   `;
 }
- async function confirmarPagamento(){
+async function confirmarPagamento(){
 
   const o = S.orders.find(
     x => String(x.id) === String(pagamentoAtual.orderId)
@@ -1143,29 +1143,59 @@ function renderPagamento(o){
 
   if(!o) return;
 
-  const recv = num(pagamentoAtual.recv);
+  // PAGAMENTO DIVIDIDO
+  if(pagamentoAtual.dividido){
 
-  if(
-    pagamentoAtual.pay === 'Dinheiro' &&
-    recv < o.total
-  ){
-    toast('O valor recebido é menor que o total.');
-    $('#pagamentoRecebido').focus();
-    return;
+    const valor2 = num(pagamentoAtual.valor2);
+    const valor1 = Math.round((o.total - valor2) * 100) / 100;
+
+    if(valor2 <= 0 || valor1 <= 0){
+      toast('Os dois valores do pagamento devem ser maiores que zero.');
+      return;
+    }
+
+    if(
+      Math.round((valor1 + valor2) * 100) !==
+      Math.round(o.total * 100)
+    ){
+      toast('Os valores do pagamento não fecham o total do pedido.');
+      return;
+    }
+
+    o.pay =
+      pagamentoAtual.pay + ' + ' +
+      pagamentoAtual.pay2;
+
+    o.received = o.total;
+    o.change = 0;
+
+  }else{
+
+    // PAGAMENTO NORMAL
+    const recv = num(pagamentoAtual.recv);
+
+    if(
+      pagamentoAtual.pay === 'Dinheiro' &&
+      recv < o.total
+    ){
+      toast('O valor recebido é menor que o total.');
+      $('#pagamentoRecebido').focus();
+      return;
+    }
+
+    o.pay = pagamentoAtual.pay;
+
+    o.received =
+      pagamentoAtual.pay === 'Dinheiro'
+        ? recv
+        : 0;
+
+    o.change =
+      pagamentoAtual.pay === 'Dinheiro' &&
+      recv > o.total
+        ? Math.round((recv - o.total) * 100) / 100
+        : 0;
   }
-
-  o.pay = pagamentoAtual.pay;
-
-  o.received =
-    pagamentoAtual.pay === 'Dinheiro'
-      ? recv
-      : 0;
-
-  o.change =
-    pagamentoAtual.pay === 'Dinheiro' &&
-    recv > o.total
-      ? Math.round((recv - o.total) * 100) / 100
-      : 0;
 
   save();
 
@@ -1193,7 +1223,6 @@ function renderPagamento(o){
 
       return;
     }
-
   }
 
   closeModal();
