@@ -869,21 +869,31 @@ function showReceipt(o, isNew){
   openModal();
 }
 function printOrder(id){
-  const o = S.orders.find(x => x.id === id);
-  if(!o) return;
+
+  const o = S.orders.find(x => String(x.id) === String(id));
+
+  if(!o){
+    toast('Pedido não encontrado.');
+    return;
+  }
 
   const printArea = $('#printArea');
 
-  printArea.innerHTML = receiptHTML(o);
+  printArea.innerHTML = `
+    <div class="receipt">
+      ${receiptHTML(o)}
+    </div>
+  `;
 
   setTimeout(() => {
+
     window.print();
 
     setTimeout(() => {
       printArea.innerHTML = '';
     }, 1000);
 
-  }, 200);
+  }, 300);
 }
 function printKitchenOrder(id){
   const o = S.orders.find(x => x.id === id);
