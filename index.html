@@ -637,6 +637,7 @@ async function carregarPedidosSupabase(){
       pay: row.pay || 'Pendente',
       received: num(row.received),
       change: num(row.change_amount),
+      paymentDetails: row.payment_details || null,
 
       status: row.status || 'novo'
     }));
@@ -1229,13 +1230,14 @@ o.change = 0;
   if(sb){
 
     const { error } = await sb
-      .from('orders')
-      .update({
-        pay: o.pay,
-        received: o.received,
-        change_amount: o.change
-      })
-      .eq('id', o.id);
+  .from('orders')
+  .update({
+    pay: o.pay,
+    received: o.received,
+    change_amount: o.change,
+    payment_details: o.paymentDetails || null
+  })
+  .eq('id', o.id);
 
     if(error){
 
