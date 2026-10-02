@@ -1091,23 +1091,32 @@ function renderPagamento(o){
           >
         </div>
 
-        <div style="background:var(--bg);padding:12px;border-radius:10px;margin-top:10px">
-          <div>
-            Primeira forma:
-            <b>
-              ${money(
-                o.total - num(pagamentoAtual.valor2)
-              )}
-            </b>
-          </div>
+      <div id="pagamentoResumoDividido" style="background:var(--bg);padding:12px;border-radius:10px;margin-top:10px">
 
-          <div style="margin-top:5px">
-            Segunda forma:
-            <b>
-              ${money(num(pagamentoAtual.valor2))}
-            </b>
-          </div>
-        </div>
+  <div>
+    Primeira forma:
+    <b>
+      ${money(
+        Math.max(0, o.total - num(pagamentoAtual.valor2))
+      )}
+    </b>
+  </div>
+
+  <div style="margin-top:5px">
+    Segunda forma:
+    <b>
+      ${money(
+        Math.min(o.total, num(pagamentoAtual.valor2))
+      )}
+    </b>
+  </div>
+
+  <div style="margin-top:8px;font-size:13px">
+    Total dividido:
+    <b>${money(o.total)}</b>
+  </div>
+
+</div>
 
         <button
           class="btn alt"
