@@ -1104,9 +1104,9 @@ function renderOrders(){
       <ul>${o.items.map(i=>`<li>${i.qty}x ${esc(i.name)}${i.detail?` <span class="meta">(${esc(i.detail)})</span>`:''}</li>`).join('')}</ul>
       <div class="order-foot">
         <span class="tot">${money(o.total)}</span><span class="meta">${esc(o.pay)}</span>
-        ${NEXT_LABEL[o.status] ? `<button class="btn sm" data-a="advance" data-id="${o.id}">${NEXT_LABEL[o.status]}</button>` : ''}
-        <button class="btn alt sm" data-a="view" data-id="${o.id}">Recibo</button>
-       ${o.status!=='cancelado' ? `<button class="btn alt sm" style="color:var(--red)" data-a="cancel" data-id="${o.id}">Cancelar</button>` : ''}
+        ${NEXT_LABEL[o.status] ? `<button type="button" class="btn sm" data-a="advance" data-id="${String(o.id)}">${NEXT_LABEL[o.status]}</button>` : ''}
+<button type="button" class="btn alt sm" data-a="view" data-id="${String(o.id)}">Recibo</button>
+${o.status!=='cancelado' ? `<button type="button" class="btn alt sm" style="color:var(--red)" data-a="cancel" data-id="${String(o.id)}">Cancelar</button>` : ''}
       </div>
     </article>`).join('') : `<div class="empty">Nenhum pedido em ${fmtDate(k)}.</div>`;
 }
