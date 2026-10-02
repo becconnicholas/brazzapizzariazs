@@ -852,7 +852,26 @@ function receiptHTML(o){
     ${o.fee ? `<div class="r"><span>Taxa de entrega</span><span>${money(o.fee)}</span></div>` : ''}
     <div class="r b" style="font-size:16px"><span>TOTAL</span><span>${money(o.total)}</span></div>
     <hr>
-    <div class="r"><span>Pagamento</span><span>${esc(o.pay)}</span></div>
+   ${
+  o.paymentDetails && o.paymentDetails.dividido
+    ? `
+      <div class="r">
+        <span>${esc(o.paymentDetails.forma1)}</span>
+        <span>${money(o.paymentDetails.valor1)}</span>
+      </div>
+
+      <div class="r">
+        <span>${esc(o.paymentDetails.forma2)}</span>
+        <span>${money(o.paymentDetails.valor2)}</span>
+      </div>
+    `
+    : `
+      <div class="r">
+        <span>Pagamento</span>
+        <span>${esc(o.pay)}</span>
+      </div>
+    `
+}
     ${o.received ? `<div class="r"><span>Recebido</span><span>${money(o.received)}</span></div><div class="r"><span>Troco</span><span>${money(o.change)}</span></div>` : ''}
     <hr>
     <div class="c">Obrigado pela preferência!</div>
@@ -1163,11 +1182,19 @@ async function confirmarPagamento(){
     }
 
     o.pay =
-      pagamentoAtual.pay + ' + ' +
-      pagamentoAtual.pay2;
+  pagamentoAtual.pay + ' + ' +
+  pagamentoAtual.pay2;
 
-    o.received = o.total;
-    o.change = 0;
+o.paymentDetails = {
+  dividido: true,
+  forma1: pagamentoAtual.pay,
+  valor1: valor1,
+  forma2: pagamentoAtual.pay2,
+  valor2: valor2
+};
+
+o.received = o.total;
+o.change = 0;
 
   }else{
 
