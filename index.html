@@ -1450,6 +1450,19 @@ case 'pagamentoForma': {
   if(op) renderPagamento(op);
   break;
 }
+
+case 'pagamentoDividido': {
+
+  pagamentoAtual.dividido = !pagamentoAtual.dividido;
+
+  const op = S.orders.find(
+    x => String(x.id) === String(pagamentoAtual.orderId)
+  );
+
+  if(op) renderPagamento(op);
+
+  break;
+}
 case 'confirmarPagamento':
   confirmarPagamento();
   break;
