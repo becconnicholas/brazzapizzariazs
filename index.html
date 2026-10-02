@@ -952,13 +952,20 @@ function printKitchenOrder(id){
 };
 
 function abrirPagamento(id){
-  const o = S.orders.find(x => x.id === id);
+
+  const o = S.orders.find(
+    x => String(x.id) === String(id)
+  );
+
   if(!o) return;
 
   pagamentoAtual = {
     orderId: id,
     pay: 'Dinheiro',
-    recv: ''
+    recv: '',
+    dividido: false,
+    pay2: 'PIX',
+    valor2: ''
   };
 
   renderPagamento(o);
@@ -966,59 +973,151 @@ function abrirPagamento(id){
 }
 
 function renderPagamento(o){
+
   const recv = num(pagamentoAtual.recv);
+  const dividido = pagamentoAtual.dividido;
 
   $('#sheet').innerHTML = `
     <h2>Finalizar pagamento</h2>
 
     <div style="background:var(--bg);padding:14px;border-radius:12px;margin-bottom:14px">
       <div><b>Pedido #${o.num}</b></div>
+
       <div style="font-size:22px;font-weight:800;margin-top:5px">
         Total: ${money(o.total)}
       </div>
     </div>
 
-    <div class="field">
-      <label>Forma de pagamento</label>
+    ${
+      !dividido
+      ? `
+        <div class="field">
+          <label>Forma de pagamento</label>
 
-      <div class="seg" style="margin-top:8px">
-        ${['Dinheiro','PIX','Cartão'].map(p => `
-          <button
-            class="btn alt"
-            data-a="pagamentoForma"
-            data-v="${p}"
-           style="${pagamentoAtual.pay===p ? 'outline:2px solid var(--green)' : ''}"
-          >
-            ${p}
-          </button>
-        `).join('')}
-      </div>
-    </div>
+          <div class="seg" style="margin-top:8px">
+            ${['Dinheiro','PIX','Cartão'].map(p => `
+              <button
+                class="btn alt"
+                data-a="pagamentoForma"
+                data-v="${p}"
+                style="${pagamentoAtual.pay===p ? 'outline:2px solid var(--green)' : ''}"
+              >
+                ${p}
+              </button>
+            `).join('')}
+          </div>
+        </div>
 
-    <div id="pagamentoDinheiro" ${pagamentoAtual.pay!=='Dinheiro' ? 'hidden' : ''}>
-      <div class="field">
-        <label>Valor recebido</label>
-        <input
-          id="pagamentoRecebido"
-          type="number"
-          inputmode="decimal"
-          step="0.01"
-          min="0"
-          placeholder="0,00"
-          value="${pagamentoAtual.recv}"
+        <button
+          class="btn alt"
+          data-a="pagamentoDividido"
+          style="width:100%;margin-top:10px"
         >
-      </div>
+          + Dividir pagamento
+        </button>
 
-      <div id="pagamentoTroco" style="margin-top:8px;font-weight:700">
-        ${
-          recv >= o.total
-            ? `Troco: ${money(recv-o.total)}`
-            : recv > 0
-              ? `Faltam ${money(o.total-recv)}`
-              : ''
-        }
-      </div>
-    </div>
+        <div id="pagamentoDinheiro" ${pagamentoAtual.pay!=='Dinheiro' ? 'hidden' : ''}>
+          <div class="field">
+            <label>Valor recebido</label>
+
+            <input
+              id="pagamentoRecebido"
+              type="number"
+              inputmode="decimal"
+              step="0.01"
+              min="0"
+              placeholder="0,00"
+              value="${pagamentoAtual.recv}"
+            >
+          </div>
+
+          <div id="pagamentoTroco" style="margin-top:8px;font-weight:700">
+            ${
+              recv >= o.total
+                ? `Troco: ${money(recv-o.total)}`
+                : recv > 0
+                  ? `Faltam ${money(o.total-recv)}`
+                  : ''
+            }
+          </div>
+        </div>
+      `
+      : `
+        <div class="field">
+          <label>Primeira forma de pagamento</label>
+
+          <div class="seg" style="margin-top:8px">
+            ${['Dinheiro','PIX','Cartão'].map(p => `
+              <button
+                class="btn alt"
+                data-a="pagamentoForma1"
+                data-v="${p}"
+                style="${pagamentoAtual.pay===p ? 'outline:2px solid var(--green)' : ''}"
+              >
+                ${p}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Segunda forma de pagamento</label>
+
+          <div class="seg" style="margin-top:8px">
+            ${['Dinheiro','PIX','Cartão'].map(p => `
+              <button
+                class="btn alt"
+                data-a="pagamentoForma2"
+                data-v="${p}"
+                style="${pagamentoAtual.pay2===p ? 'outline:2px solid var(--green)' : ''}"
+              >
+                ${p}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Valor da segunda forma</label>
+
+          <input
+            id="pagamentoValor2"
+            type="number"
+            inputmode="decimal"
+            step="0.01"
+            min="0"
+            placeholder="0,00"
+            value="${pagamentoAtual.valor2}"
+          >
+        </div>
+
+        <div style="background:var(--bg);padding:12px;border-radius:10px;margin-top:10px">
+          <div>
+            Primeira forma:
+            <b>
+              ${money(
+                o.total - num(pagamentoAtual.valor2)
+              )}
+            </b>
+          </div>
+
+          <div style="margin-top:5px">
+            Segunda forma:
+            <b>
+              ${money(num(pagamentoAtual.valor2))}
+            </b>
+          </div>
+        </div>
+
+        <button
+          class="btn alt"
+          data-a="pagamentoDividido"
+          style="width:100%;margin-top:10px"
+        >
+          ← Voltar para pagamento único
+        </button>
+      `
+    }
 
     <div class="sheet-foot">
       <button class="btn" data-a="confirmarPagamento">
