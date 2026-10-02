@@ -1354,8 +1354,62 @@ case 'pagamentoForma': {
 case 'confirmarPagamento':
   confirmarPagamento();
   break;
-    case 'view': { const o=S.orders.find(x=>x.id===id); if(o) showReceipt(o,false); break; }
-    case 'advance': { const o=S.orders.find(x=>x.id===id); const i=STATUS.indexOf(o.status); if(i>=0 && i<STATUS.length-1){ o.status=STATUS[i+1]; save(); renderOrders(); } break; }
+    case 'view': {
+
+  const o = S.orders.find(
+    x => String(x.id).trim() === String(id).trim()
+  );
+
+  if(!o){
+
+    console.error(
+      'RECIBO: pedido não encontrado',
+      id,
+      S.orders
+    );
+
+    toast('Pedido não encontrado.');
+
+    break;
+  }
+
+  showReceipt(o, false);
+
+  break;
+}
+
+case 'advance': {
+
+  const o = S.orders.find(
+    x => String(x.id).trim() === String(id).trim()
+  );
+
+  if(!o){
+
+    console.error(
+      'PREPARO: pedido não encontrado',
+      id,
+      S.orders
+    );
+
+    toast('Pedido não encontrado.');
+
+    break;
+  }
+
+  const i = STATUS.indexOf(o.status);
+
+  if(i >= 0 && i < STATUS.length - 1){
+
+    o.status = STATUS[i + 1];
+
+    save();
+    renderOrders();
+
+  }
+
+  break;
+}
     case 'cancel': {
 
   if(!confirm('Cancelar este pedido? Ele deixa de contar no caixa.')){
