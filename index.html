@@ -1755,6 +1755,36 @@ document.addEventListener('input', e => {
 
   return;
 }
+  if(id === 'pagamentoValor2'){
+
+  pagamentoAtual.valor2 = e.target.value;
+
+  const o = S.orders.find(
+    x => String(x.id) === String(pagamentoAtual.orderId)
+  );
+
+  if(!o) return;
+
+  const primeira = o.total - num(pagamentoAtual.valor2);
+
+  const resumo = $('#pagamentoResumoDividido');
+
+  if(resumo){
+    resumo.innerHTML = `
+      <div>
+        Primeira forma:
+        <b>${money(primeira)}</b>
+      </div>
+
+      <div style="margin-top:5px">
+        Segunda forma:
+        <b>${money(num(pagamentoAtual.valor2))}</b>
+      </div>
+    `;
+  }
+
+  return;
+}
   if(id==='fDiscType'){ C.discType = e.target.value; renderCart(); return; }
   if(id==='search'){ renderGrid(); }
   if(id==='clOpening' || id==='clCounted'){ updateClosingCalc($('#cxDate').value, dayOrders($('#cxDate').value)); }
