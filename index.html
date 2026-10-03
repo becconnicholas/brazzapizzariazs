@@ -822,12 +822,17 @@ async function finish(){
   o.addr = C.addr.trim();
   o.mesa = C.mesa.trim();
 
-  o.items = C.items.map(i => ({
-    name: i.name,
-    detail: i.detail,
-    unit: i.unit,
-    qty: i.qty
-  }));
+o.items = C.items.map(i => ({
+  name: i.name,
+  detail: i.detail,
+  unit: i.unit,
+  qty: i.qty,
+  key: i.key,
+  pizzaId: i.pizzaId || null,
+  pizzaId2: i.pizzaId2 || null,
+  pizzaSize: i.pizzaSize || null,
+  pizzaHalf: !!i.pizzaHalf
+}));
 
   o.subtotal = t.sub;
   o.discount = t.d;
