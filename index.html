@@ -1726,19 +1726,18 @@ function exportCSV(){
 /* ---------- editor de cardápio ---------- */
 function renderMenuEdit(){
 
-  $('#menuEdit').innerHTML = `
-    <button
-      class="btn"
-      type="button"
-      data-a="sincronizarMenu"
-      style="margin-bottom:15px"
-    >
-      Sincronizar cardápio com Supabase
-    </button>
-  `;
-
   $('#setFee').value = String(S.fee).replace('.', ',');
-  $('#menuEdit').innerHTML = Object.entries(CATS).map(([cat,label]) => `
+$('#menuEdit').innerHTML = `
+  <button
+    class="btn"
+    type="button"
+    data-a="sincronizarMenu"
+    style="margin-bottom:15px"
+  >
+    Sincronizar cardápio com Supabase
+  </button>
+
+  ${Object.entries(CATS).map(([cat,label]) => `
     <div class="menu-cat">
       <h3>${label} <button class="btn alt sm" data-a="newItem" data-v="${cat}">+ Adicionar</button></h3>
       ${S.menu.filter(i=>i.cat===cat).map(i => PIZZA_CATS.includes(cat) ? `
@@ -1753,8 +1752,7 @@ function renderMenuEdit(){
           <div class="field"><label>Preço (R$)</label><input data-f="price" data-id="${i.id}" inputmode="decimal" value="${String(i.price??'').replace('.',',')}"></div>
           <button class="btn alt sm" style="color:var(--red)" data-a="delItem" data-id="${i.id}">Excluir</button>
         </div>`).join('')}
-    </div>`).join('');
-}
+`;
 
 /* ---------- eventos ---------- */
 document.addEventListener('click', e => {
