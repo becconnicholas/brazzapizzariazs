@@ -558,7 +558,9 @@ function renderPizza(){
     <div class="field"><label for="pmNote">Observações</label><textarea id="pmNote" rows="2" placeholder="Ex.: sem cebola, bem passada">${esc(PM.note)}</textarea></div>
     <div class="sheet-foot">
       <div class="qty"><button data-a="pmQty" data-v="-1" aria-label="Diminuir">−</button><span>${PM.qty}</span><button data-a="pmQty" data-v="1" aria-label="Aumentar">+</button></div>
-      <button class="btn" data-a="pmAdd">Adicionar · ${money(unit*PM.qty)}</button>
+      <button class="btn" data-a="${PM.editKey ? 'pmSaveEdit' : 'pmAdd'}">
+  ${PM.editKey ? 'Salvar alteração' : `Adicionar · ${money(unit*PM.qty)}`}
+</button>
     </div>`;
 }
 function openModal(){ $('#modal').hidden = false; }
@@ -591,7 +593,8 @@ function renderCart(){
       ${i.detail ? `<span class="d">${esc(i.detail)}</span>` : ''}
       <div class="qty">
         <button data-a="dec" data-k="${esc(i.key)}" aria-label="Diminuir">−</button><span>${i.qty}</span><button data-a="inc" data-k="${esc(i.key)}" aria-label="Aumentar">+</button>
-        <button class="rm" data-a="rm" data-k="${esc(i.key)}">Remover</button>
+        ${i.pizzaId ? `<button class="btn alt sm" data-a="editPizza" data-k="${esc(i.key)}">Editar</button>` : ''}
+<button class="rm" data-a="rm" data-k="${esc(i.key)}">Remover</button>
       </div>
     </div>`).join('') : `<div class="empty">Toque em um item do cardápio para começar o pedido.</div>`;
 
@@ -1698,6 +1701,25 @@ document.addEventListener('click', e => {
   switch(a){
     case 'cat': curCat = v; $('#search').value=''; renderGrid(); break;
     case 'pizza': openPizza(id); break;
+      case 'editPizza': {
+  const item = C.items.find(x => x.key === k);
+
+  if(!item) break;
+
+  PM = {
+    id: item.pizzaId,
+    id2: item.pizzaId2 || null,
+    half: !!item.pizzaHalf,
+    size: item.pizzaSize || 'Grande',
+    note: item.detail || '',
+    qty: item.qty,
+    editKey: item.key
+  };
+
+  renderPizza();
+  openModal();
+  break;
+}
     case 'addItem': { const it = S.menu.find(m=>m.id===id); addLine({key:'i|'+id, name:it.name, detail:'', unit:it.price, qty:1}); break; }
     case 'type': C.type = v; renderCart(); break;
     case 'pay': C.pay = v; renderCart(); break;
@@ -1986,23 +2008,62 @@ case 'advance': {
     /* modal pizza */
     case 'pmSize': PM.size = v; renderPizza(); break;
     case 'pmQty': PM.qty = Math.max(1, PM.qty + +v); renderPizza(); break;
-    case 'pmAdd': {
-      const A = S.menu.find(m=>m.id===PM.id), B = PM.half ? S.menu.find(m=>m.id===PM.id2) : null;
-      const name = B ? `Pizza ${PM.size} ½ ${A.name} ½ ${B.name}` : `Pizza ${PM.size} ${A.name}`;
-      const detail = PM.note.trim();
-     addLine({
-  key:['p',PM.id,B?B.id:'',PM.size,PM.note.trim()].join('|'),
-  name,
-  detail,
-  unit:pizzaPrice(),
-  qty:PM.qty,
-  pizzaId: PM.id,
-  pizzaId2: B ? B.id : null,
-  pizzaSize: PM.size,
-  pizzaHalf: !!B
-});
-      closeModal(); break;
-    }
+case 'pmAdd': {
+  const A = S.menu.find(m=>m.id===PM.id), B = PM.half ? S.menu.find(m=>m.id===PM.id2) : null;
+  const name = B ? `Pizza ${PM.size} ½ ${A.name} ½ ${B.name}` : `Pizza ${PM.size} ${A.name}`;
+  const detail = PM.note.trim();
+
+  addLine({
+    key:['p',PM.id,B?B.id:'',PM.size,PM.note.trim()].join('|'),
+    name,
+    detail,
+    unit:pizzaPrice(),
+    qty:PM.qty,
+    pizzaId: PM.id,
+    pizzaId2: B ? B.id : null,
+    pizzaSize: PM.size,
+    pizzaHalf: !!B
+  });
+
+  closeModal();
+  break;
+}
+
+case 'pmSaveEdit': {
+  const item = C.items.find(x => x.key === PM.editKey);
+
+  if(!item){
+    toast('Pizza não encontrada.');
+    closeModal();
+    break;
+  }
+
+  const A = S.menu.find(m=>m.id===PM.id);
+  const B = PM.half ? S.menu.find(m=>m.id===PM.id2) : null;
+
+  if(!A){
+    toast('Pizza não encontrada no cardápio.');
+    break;
+  }
+
+  item.name = B
+    ? `Pizza ${PM.size} ½ ${A.name} ½ ${B.name}`
+    : `Pizza ${PM.size} ${A.name}`;
+
+  item.detail = PM.note.trim();
+  item.unit = pizzaPrice();
+  item.qty = PM.qty;
+  item.pizzaId = PM.id;
+  item.pizzaId2 = B ? B.id : null;
+  item.pizzaSize = PM.size;
+  item.pizzaHalf = !!B;
+
+  renderCart();
+  closeModal();
+  toast('Pizza atualizada.');
+
+  break;
+}
     /* editor */
     case 'newItem': {
       const it = PIZZA_CATS.includes(v) ? {id:uid(), cat:v, name:v==='salgada'?'Nova pizza salgada':'Nova pizza doce', desc:'', prices:{Pequena:0,Grande:0}} : {id:uid(), cat:v, name:'Novo item', desc:'', price:0};
