@@ -1557,7 +1557,23 @@ case 'pagamentoDividido': {
 case 'confirmarPagamento':
   confirmarPagamento();
   break;
-    case 'view': {
+
+case 'abrirPagamento': {
+
+  const o = S.orders.find(
+    x => String(x.id).trim() === String(id).trim()
+  );
+
+  if(!o){
+    toast('Pedido não encontrado.');
+    break;
+  }
+
+  abrirPagamento(o.id);
+  break;
+}
+
+case 'view': {
 
   const o = S.orders.find(
     x => String(x.id).trim() === String(id).trim()
