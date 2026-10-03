@@ -1287,7 +1287,16 @@ function renderOrders(){
         <span class="tot">${money(o.total)}</span><span class="meta">${esc(o.pay)}</span>
         ${NEXT_LABEL[o.status] ? `<button type="button" class="btn sm" data-a="advance" data-id="${String(o.id)}">${NEXT_LABEL[o.status]}</button>` : ''}
 <button type="button" class="btn alt sm" data-a="view" data-id="${String(o.id)}">Recibo</button>
-${o.status!=='cancelado' ? `<button type="button" class="btn alt sm" style="color:var(--red)" data-a="cancel" data-id="${String(o.id)}">Cancelar</button>` : ''}
+
+${o.pay === 'Pendente' && o.status !== 'cancelado'
+  ? `<button type="button" class="btn sm" data-a="abrirPagamento" data-id="${String(o.id)}">Pagamento</button>`
+  : ''
+}
+
+${o.status!=='cancelado'
+  ? `<button type="button" class="btn alt sm" style="color:var(--red)" data-a="cancel" data-id="${String(o.id)}">Cancelar</button>`
+  : ''
+}
       </div>
     </article>`).join('') : `<div class="empty">Nenhum pedido em ${fmtDate(k)}.</div>`;
 }
