@@ -496,14 +496,34 @@ async function carregarMenuSupabase(){
 
   if(!data || !data.length) return;
 
-  S.menu = data.map(row => ({
-    id: row.id,
-    cat: row.cat,
-    name: row.name,
-    desc: row.description || '',
-    price: num(row.price),
-    prices: row.prices || undefined
-  }));
+data.forEach(row => {
+
+  const existente = S.menu.find(
+    m => m.id === row.id
+  );
+
+  if(existente){
+
+    existente.cat = row.cat;
+    existente.name = row.name;
+    existente.desc = row.description || '';
+    existente.price = num(row.price);
+    existente.prices = row.prices || undefined;
+
+  }else{
+
+    S.menu.push({
+      id: row.id,
+      cat: row.cat,
+      name: row.name,
+      desc: row.description || '',
+      price: num(row.price),
+      prices: row.prices || undefined
+    });
+
+  }
+
+});
 
   save();
   renderGrid();
