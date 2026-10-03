@@ -836,9 +836,44 @@ async function finish(){
       ? Math.round((recv - t.total) * 100) / 100
       : 0;
 
-  save();
+ save();
 
-  pedidoEditandoId = null;
+if(sb){
+
+  const { error } = await sb
+    .from('orders')
+    .update({
+      mesa: o.mesa,
+      customer: o.customer,
+      phone: o.phone,
+      adress: o.addr,
+      items: o.items,
+      subtotal: o.subtotal,
+      discount: o.discount,
+      fee: o.fee,
+      total: o.total,
+      pay: o.pay,
+      received: o.received,
+      change_amount: o.change
+    })
+    .eq('id', o.id);
+
+  if(error){
+
+    console.error(
+      'Erro ao atualizar pedido no Supabase:',
+      error
+    );
+
+    toast(
+      'Alteração salva localmente, mas não foi atualizada no Supabase.'
+    );
+
+    return;
+  }
+}
+
+pedidoEditandoId = null;
 
   C = newCart(C.type);
   resetForm();
