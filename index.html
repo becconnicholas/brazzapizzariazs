@@ -2140,9 +2140,10 @@ if(sb){
           error
         );
 
-        toast(
-          'Salvo neste computador, mas não foi sincronizado.'
-        );
+       alert(
+  'ERRO SUPABASE:\n\n' +
+  error.message
+);
 
       }
 
