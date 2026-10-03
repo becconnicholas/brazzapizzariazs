@@ -2120,8 +2120,7 @@ document.addEventListener('change', e => {
 toast('Salvo');
 
 if(sb){
-  console.log('SUPABASE MENU CONECTADO:', sb);
-
+  alert('SUPABASE MENU CONECTADO');
   sb
     .from('menu')
     .upsert({
