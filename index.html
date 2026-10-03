@@ -1728,8 +1728,6 @@ function renderMenuEdit(){
 
   $('#setFee').value = String(S.fee).replace('.', ',');
 $('#menuEdit').innerHTML = Object.entries(CATS).map(([cat,label]) => `
-
-  ${Object.entries(CATS).map(([cat,label]) => `
     <div class="menu-cat">
       <h3>${label} <button class="btn alt sm" data-a="newItem" data-v="${cat}">+ Adicionar</button></h3>
       ${S.menu.filter(i=>i.cat===cat).map(i => PIZZA_CATS.includes(cat) ? `
