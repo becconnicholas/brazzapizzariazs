@@ -800,14 +800,65 @@ async function finish(){
     return;
   }
 
-  const today = dayKey(Date.now());
+  if(pedidoEditandoId){
 
-  if(S.counterDay !== today){
-    S.counterDay = today;
-    S.counter = 0;
+  const o = S.orders.find(
+    x => String(x.id) === String(pedidoEditandoId)
+  );
+
+  if(!o){
+    toast('Pedido original não encontrado.');
+    return;
   }
 
-  S.counter++;
+  o.type = C.type;
+  o.customer = C.name.trim();
+  o.phone = C.phone.trim();
+  o.addr = C.addr.trim();
+  o.mesa = C.mesa.trim();
+
+  o.items = C.items.map(i => ({
+    name: i.name,
+    detail: i.detail,
+    unit: i.unit,
+    qty: i.qty
+  }));
+
+  o.subtotal = t.sub;
+  o.discount = t.d;
+  o.fee = t.fee;
+  o.total = t.total;
+
+  o.pay = C.pay;
+  o.received = C.pay === 'Dinheiro' ? recv : 0;
+  o.change =
+    C.pay === 'Dinheiro' && recv > t.total
+      ? Math.round((recv - t.total) * 100) / 100
+      : 0;
+
+  save();
+
+  pedidoEditandoId = null;
+
+  C = newCart(C.type);
+  resetForm();
+  renderCart();
+
+  $('#cart').classList.remove('open');
+
+  toast('Pedido atualizado com sucesso.');
+
+  return;
+}
+
+const today = dayKey(Date.now());
+
+if(S.counterDay !== today){
+  S.counterDay = today;
+  S.counter = 0;
+}
+
+S.counter++;
 
   const order = {
     id: uid(),
