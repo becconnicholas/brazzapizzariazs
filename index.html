@@ -1003,7 +1003,44 @@ function printKitchenOrder(id){
   pay: 'Dinheiro',
   recv: ''
 };
+function abrirEdicaoPedido(id){
 
+  const o = S.orders.find(
+    x => String(x.id) === String(id)
+  );
+
+  if(!o) return;
+
+  C = {
+    type: o.type || 'balcao',
+    customer: o.customer || '',
+    phone: o.phone || '',
+    addr: o.addr || '',
+    mesa: o.mesa || '',
+    items: o.items.map(i => ({
+      ...i
+    }))
+  };
+
+  pagamentoAtual = {
+    orderId: o.id
+  };
+
+  renderCart();
+  resetForm();
+
+  $('#customer').value = o.customer || '';
+  $('#phone').value = o.phone || '';
+  $('#addr').value = o.addr || '';
+  $('#mesa').value = o.mesa || '';
+
+  toast('Pedido carregado para edição.');
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+}
 function abrirPagamento(id){
 
   const o = S.orders.find(
