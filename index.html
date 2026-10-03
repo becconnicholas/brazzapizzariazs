@@ -2116,7 +2116,39 @@ document.addEventListener('change', e => {
     else if(f==='desc') it.desc = t.value;
     else if(f==='price'){ it.price = Math.max(0, num(t.value)); t.value = String(it.price).replace('.',','); }
     else if(f.startsWith('p:')){ const s=f.slice(2); it.prices[s] = Math.max(0, num(t.value)); t.value = String(it.prices[s]).replace('.',','); }
-    save(); toast('Salvo');
+   save();
+toast('Salvo');
+
+if(sb){
+
+  sb
+    .from('menu')
+    .upsert({
+      id: it.id,
+      cat: it.cat,
+      name: it.name,
+      description: it.desc || '',
+      price: num(it.price),
+      prices: it.prices || null
+    })
+    .then(({ error }) => {
+
+      if(error){
+
+        console.error(
+          'Erro ao salvar item no Supabase:',
+          error
+        );
+
+        toast(
+          'Salvo neste computador, mas não foi sincronizado.'
+        );
+
+      }
+
+    });
+
+}
   }
 });
 
