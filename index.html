@@ -1985,7 +1985,17 @@ case 'advance': {
       const A = S.menu.find(m=>m.id===PM.id), B = PM.half ? S.menu.find(m=>m.id===PM.id2) : null;
       const name = B ? `Pizza ${PM.size} ½ ${A.name} ½ ${B.name}` : `Pizza ${PM.size} ${A.name}`;
       const detail = PM.note.trim();
-      addLine({key:['p',PM.id,B?B.id:'',PM.size,PM.note.trim()].join('|'), name, detail, unit:pizzaPrice(), qty:PM.qty});
+     addLine({
+  key:['p',PM.id,B?B.id:'',PM.size,PM.note.trim()].join('|'),
+  name,
+  detail,
+  unit:pizzaPrice(),
+  qty:PM.qty,
+  pizzaId: PM.id,
+  pizzaId2: B ? B.id : null,
+  pizzaSize: PM.size,
+  pizzaHalf: !!B
+});
       closeModal(); break;
     }
     /* editor */
