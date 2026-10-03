@@ -312,7 +312,16 @@ main{padding:16px 20px 90px;max-width:1500px;margin:0 auto}
       <button class="btn alt sm" data-a="resetMenu">Restaurar cardápio padrão</button>
       <button class="btn alt sm" data-a="wipe" style="color:var(--red)">Apagar todos os pedidos</button>
     </div>
-    <div id="menuEdit"></div>
+    <button
+  class="btn"
+  type="button"
+  data-a="sincronizarMenu"
+  style="margin-bottom:15px"
+>
+  Sincronizar cardápio com Supabase
+</button>
+
+<div id="menuEdit"></div>
   </section>
 </main>
 
