@@ -448,7 +448,39 @@ function defaultMenu(){
 function fresh(){ return {menu:defaultMenu(), orders:[], fee:6, counter:0, counterDay:dayKey(Date.now()), closings:{}}; }
 function load(){ try{ const r=localStorage.getItem(LS); return r?JSON.parse(r):null; }catch(e){ return null; } }
 function save(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){ toast('Não foi possível salvar neste navegador.'); } }
-let S = load() || fresh();
+async function carregarMenuSupabase(){
+
+  if(!sb) return;
+
+  const { data, error } = await sb
+    .from('menu')
+    .select('*')
+    .order('name');
+
+  if(error){
+    console.error('Erro ao carregar menu do Supabase:', error);
+    return;
+  }
+
+  if(!data || !data.length) return;
+
+  S.menu = data.map(row => ({
+    id: row.id,
+    cat: row.cat,
+    name: row.name,
+    desc: row.description || '',
+    price: num(row.price),
+    prices: row.prices || undefined
+  }));
+
+  save();
+  renderGrid();
+
+  if(typeof renderMenuEdit === 'function'){
+    renderMenuEdit();
+  }
+}
+  let S = load() || fresh();
 if(!S.closings) S.closings = {};
 /* migração aditiva: cardápios já salvos no navegador não ganham categorias novas
    automaticamente (para não apagar preços editados); se uma categoria existir
