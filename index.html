@@ -1011,16 +1011,20 @@ function abrirEdicaoPedido(id){
 
   if(!o) return;
 
-  C = {
-    type: o.type || 'balcao',
-    customer: o.customer || '',
-    phone: o.phone || '',
-    addr: o.addr || '',
-    mesa: o.mesa || '',
-    items: (o.items || []).map(i => ({
-      ...i
-    }))
-  };
+C = {
+  type: o.type || 'balcao',
+  items: (o.items || []).map(i => ({
+    ...i
+  })),
+  name: o.customer || '',
+  phone: o.phone || '',
+  addr: o.addr || '',
+  mesa: o.mesa || '',
+  discVal: 0,
+  discType: 'R',
+  pay: o.pay === 'Pix' ? 'Pix' : o.pay === 'Cartão' ? 'Cartão' : 'Dinheiro',
+  recv: o.received || ''
+};
 
   pagamentoAtual = {
     orderId: o.id
