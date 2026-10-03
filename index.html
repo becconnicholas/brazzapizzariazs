@@ -1606,6 +1606,20 @@ case 'abrirPagamento': {
   abrirPagamento(o.id);
   break;
 }
+case 'editarPedido': {
+
+  const o = S.orders.find(
+    x => String(x.id).trim() === String(id).trim()
+  );
+
+  if(!o){
+    toast('Pedido não encontrado.');
+    break;
+  }
+
+  abrirEdicaoPedido(o.id);
+  break;
+}
 
 case 'view': {
 
