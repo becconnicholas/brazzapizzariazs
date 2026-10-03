@@ -1017,7 +1017,7 @@ function abrirEdicaoPedido(id){
     phone: o.phone || '',
     addr: o.addr || '',
     mesa: o.mesa || '',
-    items: o.items.map(i => ({
+    items: (o.items || []).map(i => ({
       ...i
     }))
   };
@@ -1026,13 +1026,14 @@ function abrirEdicaoPedido(id){
     orderId: o.id
   };
 
-  renderCart();
   resetForm();
 
-  $('#customer').value = o.customer || '';
-  $('#phone').value = o.phone || '';
-  $('#addr').value = o.addr || '';
-  $('#mesa').value = o.mesa || '';
+  $('#fName').value = o.customer || '';
+  $('#fPhone').value = o.phone || '';
+  $('#fAddr').value = o.addr || '';
+  $('#fMesa').value = o.mesa || '';
+
+  renderCart();
 
   toast('Pedido carregado para edição.');
 
