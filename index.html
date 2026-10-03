@@ -661,7 +661,12 @@ async function carregarPedidosSupabase(){
       addr: row.adress || '',
       mesa: row.mesa || '',
 
-      items: Array.isArray(row.items) ? row.items : [],
+     items: Array.isArray(row.items)
+  ? row.items.map((i, index) => ({
+      ...i,
+      key: i.key || `loaded|${index}|${i.name}`
+    }))
+  : [],
 
       subtotal: num(row.subtotal),
       discount: num(row.discount),
