@@ -481,6 +481,7 @@ async function carregarMenuSupabase(){
   }
 }
   let S = load() || fresh();
+  carregarMenuSupabase();
 if(!S.closings) S.closings = {};
 /* migração aditiva: cardápios já salvos no navegador não ganham categorias novas
    automaticamente (para não apagar preços editados); se uma categoria existir
