@@ -1705,6 +1705,18 @@ function exportCSV(){
 
 /* ---------- editor de cardápio ---------- */
 function renderMenuEdit(){
+
+  $('#menuEdit').innerHTML = `
+    <button
+      class="btn"
+      type="button"
+      data-a="sincronizarMenu"
+      style="margin-bottom:15px"
+    >
+      Sincronizar cardápio com Supabase
+    </button>
+  `;
+
   $('#setFee').value = String(S.fee).replace('.', ',');
   $('#menuEdit').innerHTML = Object.entries(CATS).map(([cat,label]) => `
     <div class="menu-cat">
