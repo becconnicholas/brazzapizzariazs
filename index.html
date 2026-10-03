@@ -448,6 +448,38 @@ function defaultMenu(){
 function fresh(){ return {menu:defaultMenu(), orders:[], fee:6, counter:0, counterDay:dayKey(Date.now()), closings:{}}; }
 function load(){ try{ const r=localStorage.getItem(LS); return r?JSON.parse(r):null; }catch(e){ return null; } }
 function save(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){ toast('Não foi possível salvar neste navegador.'); } }
+  async function sincronizarMenuSupabase(){
+
+  if(!sb){
+    alert('Supabase não está conectado.');
+    return;
+  }
+
+  for(const it of S.menu){
+
+    const { error } = await sb
+      .from('menu')
+      .upsert({
+        id: it.id,
+        cat: it.cat,
+        name: it.name,
+        description: it.desc || '',
+        price: num(it.price),
+        prices: it.prices || null
+      });
+
+    if(error){
+      alert(
+        'Erro ao sincronizar o cardápio:\n\n' +
+        error.message
+      );
+      return;
+    }
+
+  }
+
+  alert('Cardápio sincronizado com sucesso!');
+}
 async function carregarMenuSupabase(){
 
   if(!sb) return;
