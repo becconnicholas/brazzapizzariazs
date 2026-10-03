@@ -501,6 +501,7 @@ if(!S.closings) S.closings = {};
 /* pedido em andamento */
 const newCart = (type='balcao') => ({type, items:[], name:'', phone:'', addr:'', mesa:'', discVal:0, discType:'R', pay:'Dinheiro', recv:''});
 let C = newCart();
+let pedidoEditandoId = null;
 let curCat = 'salgada';
 
 /* ---------- navegação ---------- */
@@ -1010,7 +1011,9 @@ function abrirEdicaoPedido(id){
   );
 
   if(!o) return;
-
+  
+pedidoEditandoId = o.id;
+  
 C = {
   type: o.type || 'balcao',
   items: (o.items || []).map(i => ({
