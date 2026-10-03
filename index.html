@@ -1832,10 +1832,37 @@ case 'advance': {
 
   if(i >= 0 && i < STATUS.length - 1){
 
-    o.status = STATUS[i + 1];
+   o.status = STATUS[i + 1];
 
-    save();
-    renderOrders();
+save();
+renderOrders();
+
+if(sb){
+
+  sb
+    .from('orders')
+    .update({
+      status: o.status
+    })
+    .eq('id', o.id)
+    .then(({ error }) => {
+
+      if(error){
+
+        console.error(
+          'Erro ao atualizar status no Supabase:',
+          error
+        );
+
+        toast(
+          'Status salvo localmente, mas não foi atualizado no Supabase.'
+        );
+
+      }
+
+    });
+
+}
 
   }
 
