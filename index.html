@@ -840,9 +840,9 @@ async function finish(){
 
 if(sb){
 
-  const { error } = await sb
-    .from('orders')
-    .update({
+ const { data: atualizado, error } = await sb
+  .from('orders')
+  .update({
       mesa: o.mesa,
       customer: o.customer,
       phone: o.phone,
@@ -857,6 +857,7 @@ if(sb){
       change_amount: o.change
     })
     .eq('id', o.id);
+  console.log('PEDIDO ATUALIZADO NO SUPABASE:', atualizado);
 
   if(error){
 
