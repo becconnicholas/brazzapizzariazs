@@ -3753,7 +3753,23 @@ if(menuItem){
     ).length;
 
     const daily = {};
-    const products = {};
+const products = {};
+
+const pizzaSummary = {
+  salgada: {
+    pequena: 0,
+    grande: 0,
+    total: 0
+  },
+  doce: {
+    pequena: 0,
+    grande: 0,
+    total: 0
+  },
+  bebida: {
+    total: 0
+  }
+};
 
     days.forEach(day => {
       daily[day] = {
