@@ -2732,9 +2732,30 @@ const pizzaSummary = {
       order.items.forEach(item => {
 
         const name = item.name;
-        const qty = Number(item.qty)||0;
-        const revenue =
-          (Number(item.unit)||0) * qty;
+const qty = Number(item.qty)||0;
+const revenue =
+  (Number(item.unit)||0) * qty;
+
+const itemName = String(item.name || '');
+
+let categoria = null;
+let tamanho = null;
+
+if(item.pizzaSize === 'Pequena' || item.pizzaSize === 'Grande'){
+  tamanho = item.pizzaSize;
+}else if(/\bPequena\b/i.test(itemName)){
+  tamanho = 'Pequena';
+}else if(/\bGrande\b/i.test(itemName)){
+  tamanho = 'Grande';
+}
+
+const menuItem = S.menu.find(m =>
+  m.name === itemName
+);
+
+if(menuItem){
+  categoria = menuItem.cat;
+}
 
         if(!products[name]){
           products[name] = {
