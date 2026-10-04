@@ -2756,6 +2756,17 @@ const menuItem = S.menu.find(m =>
 if(menuItem){
   categoria = menuItem.cat;
 }
+        if(categoria === 'bebida'){
+          pizzaSummary.bebida.total += qty;
+        }
+
+        if(
+          (categoria === 'salgada' || categoria === 'doce') &&
+          tamanho
+        ){
+          pizzaSummary[categoria][tamanho.toLowerCase()] += qty;
+          pizzaSummary[categoria].total += qty;
+        }
 
         if(!products[name]){
           products[name] = {
