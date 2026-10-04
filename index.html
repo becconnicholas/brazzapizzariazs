@@ -3780,16 +3780,17 @@ if(menuItem){
       });
     });
 
-    return {
-      month,
-      days,
-      orders,
-      cancelled,
-      daily,
-      products
-    };
-  }
-
+   return {
+  month,
+  days,
+  orders,
+  cancelled,
+  daily,
+  products,
+  pizzaSummary
+};
+        }
+    
   function renderMonthlyReport(){
 
     const monthInput = document.getElementById('repMonth');
