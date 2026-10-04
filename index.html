@@ -1177,9 +1177,10 @@ pedidoEditandoId = o.id;
   
 C = {
   type: o.type || 'balcao',
-  items: (o.items || []).map(i => ({
-    ...i
-  })),
+ items: (o.items || []).map((i, index) => ({
+  ...i,
+  key: i.key || ('edit|' + index + '|' + Date.now())
+})),
   name: o.customer || '',
   phone: o.phone || '',
   addr: o.addr || '',
