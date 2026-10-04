@@ -3810,6 +3810,36 @@ const pizzaSummary = {
         const qty = Number(item.qty)||0;
         const revenue =
           (Number(item.unit)||0) * qty;
+        const itemName = String(item.name || '');
+
+let categoria = null;
+let tamanho = null;
+
+if(/\bPequena\b/i.test(itemName)){
+  tamanho = 'Pequena';
+}else if(/\bGrande\b/i.test(itemName)){
+  tamanho = 'Grande';
+}
+
+const menuItem = S.menu.find(m =>
+  itemName.includes(m.name)
+);
+
+if(menuItem){
+  categoria = menuItem.cat;
+}
+
+if(categoria === 'bebida'){
+  pizzaSummary.bebida.total += qty;
+}
+
+if(
+  (categoria === 'salgada' || categoria === 'doce') &&
+  tamanho
+){
+  pizzaSummary[categoria][tamanho.toLowerCase()] += qty;
+  pizzaSummary[categoria].total += qty;
+}
 
         if(!products[name]){
           products[name] = {
