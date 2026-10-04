@@ -2750,7 +2750,7 @@ if(item.pizzaSize === 'Pequena' || item.pizzaSize === 'Grande'){
 }
 
 const menuItem = S.menu.find(m =>
-  m.name === itemName
+  itemName.includes(m.name)
 );
 
 if(menuItem){
